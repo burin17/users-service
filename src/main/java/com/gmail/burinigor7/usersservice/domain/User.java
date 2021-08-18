@@ -1,7 +1,6 @@
 package com.gmail.burinigor7.usersservice.domain;
 
 import lombok.Data;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,20 +19,24 @@ public class User {
     @Column(columnDefinition = "SERIAL")
     private Long id;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
     private String patronymic;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
     @ManyToOne
-    @JoinColumn(name = "user_role")
+    @JoinColumn(name = "user_role", nullable = false)
     private Role role;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false, unique = true)
     private String login;
 }
