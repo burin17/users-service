@@ -81,22 +81,38 @@ public class UserController {
 
     @PostMapping
     public User newUser(@RequestBody User user) {
-        return null;
+        return userRepository.save(user);
     }
 
     @PutMapping("/{id}")
-    public User replaceUser(@RequestBody User user, @PathVariable Long id) {
-        return null;
+    public User replaceUser(@RequestBody User newUser, @PathVariable Long id) {
+        return userRepository.findById(id)
+                .map(fetched -> userRepository.save(replaceUser(fetched, newUser)))
+                        .orElseGet(() -> {
+                            newUser.setId(id);
+                            return userRepository.save(newUser);
+                        });
     }
 
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
-
+        userRepository.deleteById(id);
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String userNotFoundExceptionHandler(UserNotFoundException exception) {
         return exception.getMessage();
+    }
+
+    private User replaceUser(User fetched, User newUser) {
+        fetched.setFirstName(newUser.getFirstName());
+        fetched.setLastName(newUser.getLastName());
+        fetched.setPatronymic(newUser.getPatronymic());
+        fetched.setPhoneNumber(newUser.getPhoneNumber());
+        fetched.setRole(newUser.getRole());
+        fetched.setEmail(newUser.getEmail());
+        fetched.setLogin(newUser.getLogin());
+        return fetched;
     }
 }
