@@ -1,10 +1,20 @@
 package com.gmail.burinigor7.usersservice.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 
-@AllArgsConstructor
-@Getter
+import javax.persistence.*;
+import java.util.List;
+
+@Data
+@Entity
+@Table(name = "usr_role")
 public class Role {
-    private final String title;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String title;
+
+    @OneToMany(mappedBy = "role")
+    private List<User> users;
 }
