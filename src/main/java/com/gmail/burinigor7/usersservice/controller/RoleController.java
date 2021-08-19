@@ -4,7 +4,9 @@ import com.gmail.burinigor7.usersservice.dao.RoleRepository;
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.exception.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -53,14 +56,17 @@ public class RoleController {
                     fetched.setTitle(newRole.getTitle());
                     return roleRepository.save(fetched);
                 })
-                .orElseGet(() -> {
-                    newRole.setId(id);
-                    return roleRepository.save(newRole);
-                });
+                .orElseThrow(() -> new RoleNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
     public void deleteRole(@PathVariable Long id) {
         roleRepository.deleteById(id);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String userNotFoundExceptionHandler(RoleNotFoundException exception) {
+        return exception.getMessage();
     }
 }
