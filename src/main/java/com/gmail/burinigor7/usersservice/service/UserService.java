@@ -47,7 +47,7 @@ public class UserService {
         return userRepository.findByRole(role);
     }
 
-    public User usersByPhoneNumber(String phoneNumber) {
+    public User userByPhoneNumber(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UserNotFoundException("User with phone number '" +
                         phoneNumber + "' not found."));

@@ -60,7 +60,7 @@ public class UserController {
 
     @GetMapping(params = "phone-number")
     public User usersByPhoneNumber(@RequestParam("phone-number") String phoneNumber) {
-        return userService.usersByPhoneNumber(phoneNumber);
+        return userService.userByPhoneNumber(phoneNumber);
     }
 
     @PostMapping

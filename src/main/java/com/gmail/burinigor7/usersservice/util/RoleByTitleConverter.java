@@ -14,7 +14,6 @@ public class RoleByTitleConverter implements Converter<String, Role> {
     @Autowired
     public RoleByTitleConverter(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
-
     }
 
     @Override
