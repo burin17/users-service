@@ -1,9 +1,9 @@
 package com.gmail.burinigor7.usersservice.controller;
 
-import com.gmail.burinigor7.usersservice.dao.RoleRepository;
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.exception.RoleNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.gmail.burinigor7.usersservice.service.RoleService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,52 +19,41 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/roles")
+@RequiredArgsConstructor
 public class RoleController {
-    private final RoleRepository roleRepository;
-
-    @Autowired
-    public RoleController(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
+    private final RoleService roleService;
 
     @GetMapping("/{id}")
     public Role role(@PathVariable Long id) {
-        return roleRepository.findById(id)
-                .orElseThrow(() -> new RoleNotFoundException(id));
+        return roleService.role(id);
     }
 
     @GetMapping
     public Iterable<Role> all() {
-        return roleRepository.findAll();
+        return roleService.all();
     }
 
     @GetMapping(params = "title")
     public Role roleByTitle(@RequestParam String title) {
-        return roleRepository.findByTitle(title)
-                .orElseThrow(() -> new RoleNotFoundException(title));
+        return roleService.roleByTitle(title);
     }
 
     @PostMapping
     public Role newRole(@RequestBody Role role) {
-        return roleRepository.save(role);
+        return roleService.newRole(role);
     }
 
     @PutMapping("/{id}")
     public Role replaceRole(@RequestBody Role newRole, @PathVariable Long id) {
-        return roleRepository.findById(id)
-                .map(fetched -> {
-                    fetched.setTitle(newRole.getTitle());
-                    return roleRepository.save(fetched);
-                })
-                .orElseThrow(() -> new RoleNotFoundException(id));
+        return roleService.replaceRole(newRole, id);
     }
 
     @DeleteMapping("/{id}")
     public void deleteRole(@PathVariable Long id) {
-        roleRepository.deleteById(id);
+        roleService.deleteRole(id);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(RoleNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String userNotFoundExceptionHandler(RoleNotFoundException exception) {
         return exception.getMessage();
