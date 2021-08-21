@@ -97,7 +97,8 @@ public class UserController {
     }
 
     @GetMapping(params = "phone-number")
-    public EntityModel<User> usersByPhoneNumber(@RequestParam("phone-number") String phoneNumber) {
+    public EntityModel<User> usersByPhoneNumber(
+            @RequestParam("phone-number") String phoneNumber) {
         User user = userService.userByPhoneNumber(phoneNumber);
         return assembler.toModel(user);
     }
@@ -110,7 +111,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<User>> replaceUser(@RequestBody User newUser, @PathVariable Long id) {
+    public ResponseEntity<EntityModel<User>> replaceUser(@RequestBody User newUser,
+                                                         @PathVariable Long id) {
         EntityModel<User> userModel = assembler.toModel(userService.replaceUser(newUser, id));
         return ResponseEntity.created(userModel.getRequiredLink(IanaLinkRelations.SELF)
                 .toUri()).body(userModel);
