@@ -58,7 +58,6 @@ public class RoleControllerTests {
 
     @BeforeEach
     private void setup(ApplicationContext context) {
-        System.out.println(123);
         roleModelAssembler = context.getBean(RoleModelAssembler.class);
     }
 
@@ -96,7 +95,7 @@ public class RoleControllerTests {
 
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
         verify(roleService, times(1)).role(idCaptor.capture());
-        assertEquals(idCaptor.getValue(), roleId);
+        assertEquals(roleId, idCaptor.getValue());
     }
 
     @Test
@@ -185,9 +184,9 @@ public class RoleControllerTests {
         ArgumentCaptor<Role> roleCaptor = ArgumentCaptor.forClass(Role.class);
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
         verify(roleService, times(1)).replaceRole(roleCaptor.capture(), idCaptor.capture());
-        assertEquals(roleCaptor.getValue().getTitle(), requestBodyPojo.getTitle());
+        assertEquals(requestBodyPojo.getTitle(), roleCaptor.getValue().getTitle());
         assertNull(roleCaptor.getValue().getId());
-        assertEquals(idCaptor.getValue(), replacedRoleId);
+        assertEquals(replacedRoleId, idCaptor.getValue());
 
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
 
@@ -213,9 +212,9 @@ public class RoleControllerTests {
         ArgumentCaptor<Role> roleCaptor = ArgumentCaptor.forClass(Role.class);
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
         verify(roleService, times(1)).replaceRole(roleCaptor.capture(), idCaptor.capture());
-        assertEquals(roleCaptor.getValue().getTitle(), requestBodyPojo.getTitle());
+        assertEquals(requestBodyPojo.getTitle(), roleCaptor.getValue().getTitle());
         assertNull(roleCaptor.getValue().getId());
-        assertEquals(idCaptor.getValue(), replacedRoleId);
+        assertEquals(replacedRoleId, idCaptor.getValue());
     }
 
     @Test
@@ -227,7 +226,7 @@ public class RoleControllerTests {
 
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
         verify(roleService, times(1)).deleteRole(idCaptor.capture());
-        assertEquals(idCaptor.getValue(), deletedRoleId);
+        assertEquals(deletedRoleId, idCaptor.getValue());
     }
 
     private String payloadOfHalResponse(Role pojo) throws JsonProcessingException {
