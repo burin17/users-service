@@ -71,7 +71,7 @@ public class EndToEndTests {
 
         // create, pull and assert user with role1
         User user = new User(null, "Ivan", "Ivanov", "Petrovich",
-                "89871111111", role1,
+                "+79871111111", role1,
                 "test@email.com", "ivanov1");
         createUser(user);
         JSONObject userJsonObjectWithRole1 = getUserJsonObjectByLogin("ivanov1");
