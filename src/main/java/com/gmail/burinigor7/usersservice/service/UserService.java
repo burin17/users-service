@@ -4,6 +4,7 @@ import com.gmail.burinigor7.usersservice.dao.UserRepository;
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
+import com.gmail.burinigor7.usersservice.util.UserRoleValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserRoleValidator userRoleValidator;
 
     public User user(Long id) {
         return userRepository.findById(id)
@@ -54,17 +56,23 @@ public class UserService {
     }
 
     public User newUser(User user) {
+        userRoleValidator.validate(user);
         return userRepository.save(user);
     }
 
     public User replaceUser(User newUser, Long id) {
+        userRoleValidator.validate(newUser);
         return userRepository.findById(id)
                 .map(fetched -> userRepository.save(replaceUser(fetched, newUser)))
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+        } else {
+            throw new UserNotFoundException(id);
+        }
     }
 
     private User replaceUser(User fetched, User newUser) {

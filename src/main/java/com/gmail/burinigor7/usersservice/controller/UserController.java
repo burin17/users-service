@@ -3,6 +3,8 @@ package com.gmail.burinigor7.usersservice.controller;
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
+import com.gmail.burinigor7.usersservice.exception.UserRoleIdNotSpecifiedException;
+import com.gmail.burinigor7.usersservice.exception.UserRoleNotPresentedException;
 import com.gmail.burinigor7.usersservice.service.UserService;
 import com.gmail.burinigor7.usersservice.util.UserModelAssembler;
 import lombok.RequiredArgsConstructor;
@@ -128,6 +130,15 @@ public class UserController {
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String userNotFoundExceptionHandler(UserNotFoundException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler({
+            UserRoleIdNotSpecifiedException.class,
+            UserRoleNotPresentedException.class
+    })
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String userRoleExceptionsHandler(Exception exception) {
         return exception.getMessage();
     }
 }
