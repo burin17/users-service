@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -104,14 +105,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<EntityModel<User>> newUser(@RequestBody User user) {
+    public ResponseEntity<EntityModel<User>> newUser(@RequestBody @Valid User user) {
         EntityModel<User> userModel = assembler.toModel(userService.newUser(user));
         return ResponseEntity.created(userModel.getRequiredLink(IanaLinkRelations.SELF)
                 .toUri()).body(userModel);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<User>> replaceUser(@RequestBody User newUser,
+    public ResponseEntity<EntityModel<User>> replaceUser(@RequestBody @Valid User newUser,
                                                          @PathVariable Long id) {
         EntityModel<User> userModel = assembler.toModel(userService.replaceUser(newUser, id));
         return ResponseEntity.created(userModel.getRequiredLink(IanaLinkRelations.SELF)
