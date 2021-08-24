@@ -4,6 +4,7 @@ import com.gmail.burinigor7.usersservice.dao.UserRepository;
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
+import com.gmail.burinigor7.usersservice.util.UserRoleValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,9 @@ import static org.mockito.Mockito.when;
 public class UserServiceTests {
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserRoleValidator userRoleValidator;
 
     @InjectMocks
     private UserService userService;
@@ -163,5 +167,20 @@ public class UserServiceTests {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class, () -> userService
                 .replaceUser(passed, userId));
+    }
+
+    @Test
+    public void deleteUser_whenUserExists_thenNoExceptionThrown() {
+        long id = 1L;
+        when(userRepository.existsById(id)).thenReturn(true);
+        userService.deleteUser(id);
+    }
+
+    @Test
+    public void deleteUser_whenUserNotExists_thenExceptionThrown() {
+        long id = 1L;
+        when(userRepository.existsById(id)).thenReturn(false);
+        assertThrows(UserNotFoundException.class,
+                () -> userService.deleteUser(id));
     }
 }

@@ -96,4 +96,19 @@ public class RoleServiceTests {
         assertThrows(RoleNotFoundException.class, () -> roleService
                 .replaceRole(new Role(null, newRoleTitle), roleId));
     }
+
+    @Test
+    public void deleteRole_whenRoleExists_thenNoExceptionThrown() {
+        long id = 1L;
+        when(roleRepository.existsById(id)).thenReturn(true);
+        roleService.deleteRole(id);
+    }
+
+    @Test
+    public void deleteRole_whenRoleNotExists_thenExceptionThrown() {
+        long id = 1L;
+        when(roleRepository.existsById(id)).thenReturn(false);
+        assertThrows(RoleNotFoundException.class,
+                () -> roleService.deleteRole(id));
+    }
 }
