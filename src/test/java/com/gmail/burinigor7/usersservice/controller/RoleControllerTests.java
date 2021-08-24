@@ -7,6 +7,7 @@ import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.exception.RoleNotFoundException;
 import com.gmail.burinigor7.usersservice.service.RoleService;
 import com.gmail.burinigor7.usersservice.util.RoleModelAssembler;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -227,6 +228,36 @@ public class RoleControllerTests {
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
         verify(roleService, times(1)).deleteRole(idCaptor.capture());
         assertEquals(deletedRoleId, idCaptor.getValue());
+    }
+
+    @Test
+    public void newRole_whenInvalidRoleTitle_thenReturns422() throws Exception {
+        Role requestBody = new Role(1L, "a");
+
+        MvcResult mvcResult = mockMvc.perform(post("/roles")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+
+        String json = mvcResult.getResponse().getContentAsString();
+        JSONObject jsonObject = new JSONObject(json);
+        jsonObject.getString("title"); // throws exception if 'title' not presented
+    }
+
+    @Test
+    public void replaceRole_whenInvalidRoleTitle_thenReturns422() throws Exception {
+        Role requestBody = new Role(1L, "a");
+
+        MvcResult mvcResult = mockMvc.perform(put("/roles/{roleId}", requestBody.getId())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+
+        String json = mvcResult.getResponse().getContentAsString();
+        JSONObject jsonObject = new JSONObject(json);
+        jsonObject.getString("title"); // throws exception if 'title' not presented
     }
 
     private String payloadOfHalResponse(Role pojo) throws JsonProcessingException {

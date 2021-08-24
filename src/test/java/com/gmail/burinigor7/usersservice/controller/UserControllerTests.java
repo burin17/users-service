@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
+import com.gmail.burinigor7.usersservice.exception.UserRoleIdNotSpecifiedException;
+import com.gmail.burinigor7.usersservice.exception.UserRoleNotPresentedException;
 import com.gmail.burinigor7.usersservice.service.UserService;
 import com.gmail.burinigor7.usersservice.util.RoleByTitleConverter;
 import com.gmail.burinigor7.usersservice.util.UserModelAssembler;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -270,7 +273,7 @@ public class UserControllerTests {
     @Test
     public void newUser_whenValidInput_thenReturns201() throws Exception {
         User requestBodyPojo = new User(null, "Ivan", "Ivanov", "Petrovich",
-                "89871111111", new Role(1L, "User"),
+                "+79871111111", new Role(1L, "User"),
                 "test@email.com", "ivanov1");
         User returnedByRoleService = new User(1L, requestBodyPojo.getFirstName(),
                 requestBodyPojo.getLastName(), requestBodyPojo.getPatronymic(),
@@ -308,7 +311,7 @@ public class UserControllerTests {
     public void replaceUser_whenValidInput_thenReturns201() throws Exception {
         long replacedUserId = 1L;
         User requestBodyPojo = new User(null, "Ivan", "Ivanov", "Petrovich",
-                "89871111111", new Role(1L, "User"),
+                "+79871111111", new Role(1L, "User"),
                 "test@email.com", "ivanov1");
         User returnedByRoleService = new User(replacedUserId, requestBodyPojo.getFirstName(),
                 requestBodyPojo.getLastName(), requestBodyPojo.getPatronymic(),
@@ -349,7 +352,7 @@ public class UserControllerTests {
     public void replaceUser_whenNotExistentRoleIdSpecified_thenReturns404() throws Exception {
         long replacedUserId = -1L;
         User requestBodyPojo = new User(null, "Ivan", "Ivanov", "Petrovich",
-                "89871111111", new Role(1L, "User"),
+                "+79871111111", new Role(1L, "User"),
                 "test@email.com", "ivanov1");
 
         when(userService.replaceUser(requestBodyPojo, replacedUserId))
@@ -386,6 +389,70 @@ public class UserControllerTests {
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
         verify(userService, times(1)).deleteUser(idCaptor.capture());
         assertEquals(deleteUserId, idCaptor.getValue());
+    }
+
+    @Test
+    public void newUser_whenInvalidUserPhoneNumber_thenReturns422() throws Exception {
+        User requestBody = new User(null, "Ivan", "Ivanov", "Petrovich",
+                "123", new Role(1L, "User"),
+                "test@email.com", "ivanov1");
+
+        MvcResult mvcResult = mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+
+        String json = mvcResult.getResponse().getContentAsString();
+        JSONObject jsonObject = new JSONObject(json);
+        jsonObject.getString("phoneNumber"); // throws exception if 'phoneNumber' not presented
+    }
+
+    @Test
+    public void replaceUser_whenInvalidUserPhoneNumber_thenReturns422() throws Exception {
+        User requestBody = new User(1L, "Ivan", "Ivanov", "Petrovich",
+                "123", new Role(1L, "User"),
+                "test@email.com", "ivanov1");
+
+        MvcResult mvcResult = mockMvc.perform(put("/users/{userId}", requestBody.getId())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+
+        String json = mvcResult.getResponse().getContentAsString();
+        JSONObject jsonObject = new JSONObject(json);
+        jsonObject.getString("phoneNumber"); // throws exception if 'phoneNumber' not presented
+    }
+
+    @Test
+    public void newUser_whenUserRoleIdNotPresented_thenReturns422() throws Exception {
+        User requestBody = new User(1L, "Ivan", "Ivanov", "Petrovich",
+                "+79999999999", new Role(null, "User"),
+                "test@email.com", "ivanov1");
+
+        when(userService.newUser(requestBody))
+                .thenThrow(UserRoleIdNotSpecifiedException.class);
+
+        mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void newUser_whenUserRoleNotExistent_thenReturns422() throws Exception {
+        User requestBody = new User(1L, "Ivan", "Ivanov", "Petrovich",
+                "+79999999999", new Role(1L, "User"),
+                "test@email.com", "ivanov1");
+
+        when(userService.replaceUser(requestBody, requestBody.getId()))
+                .thenThrow(UserRoleNotPresentedException.class);
+
+        mockMvc.perform(put("/users/{userId}", requestBody.getId())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isUnprocessableEntity());
     }
 
     private String payloadOfHalResponse(User pojo) throws JsonProcessingException {
