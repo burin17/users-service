@@ -39,6 +39,10 @@ public class RoleService {
     }
 
     public void deleteRole(Long id) {
-        roleRepository.deleteById(id);
+        if (roleRepository.existsById(id)) {
+            roleRepository.deleteById(id);
+        } else {
+            throw new RoleNotFoundException(id);
+        }
     }
 }

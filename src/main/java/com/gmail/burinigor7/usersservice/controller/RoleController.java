@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -58,7 +59,7 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<EntityModel<Role>> newRole(@RequestBody Role role) {
+    public ResponseEntity<EntityModel<Role>> newRole(@RequestBody @Valid Role role) {
         EntityModel<Role> roleModel = assembler.toModel(roleService.newRole(role));
         return ResponseEntity
                 .created(roleModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -66,7 +67,7 @@ public class RoleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<Role>> replaceRole(@RequestBody Role newRole,
+    public ResponseEntity<EntityModel<Role>> replaceRole(@RequestBody @Valid Role newRole,
                                                          @PathVariable Long id) {
         EntityModel<Role> roleModel = assembler
                 .toModel(roleService.replaceRole(newRole, id));
