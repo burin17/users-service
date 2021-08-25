@@ -4,6 +4,8 @@ import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.exception.RoleNotFoundException;
 import com.gmail.burinigor7.usersservice.service.RoleService;
 import com.gmail.burinigor7.usersservice.util.RoleModelAssembler;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -36,13 +38,13 @@ public class RoleController {
     private final RoleService roleService;
     private final RoleModelAssembler assembler;
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = "application/json")
     public EntityModel<Role> role(@PathVariable Long id) {
         Role role = roleService.role(id);
         return assembler.toModel(role);
     }
 
-    @GetMapping
+    @GetMapping(produces = "application/json")
     public CollectionModel<EntityModel<Role>> all() {
         List<EntityModel<Role>> roleModels = StreamSupport
                 .stream(roleService.all().spliterator(), false)
@@ -52,13 +54,17 @@ public class RoleController {
                 linkTo(methodOn(RoleController.class).all()).withSelfRel());
     }
 
-    @GetMapping(params = "title")
+    @GetMapping(params = "title", produces = "application/json")
     public EntityModel<Role> roleByTitle(@RequestParam String title) {
         Role role = roleService.roleByTitle(title);
         return assembler.toModel(role);
     }
 
-    @PostMapping
+    @PostMapping(produces = "application/json")
+    @ApiResponses({
+            @ApiResponse(code = 409, message="Conflict with existent role's 'title' value"),
+            @ApiResponse(code = 422, message="Incorrect 'title' of request body")
+    })
     public ResponseEntity<EntityModel<Role>> newRole(@RequestBody @Valid Role role) {
         EntityModel<Role> roleModel = assembler.toModel(roleService.newRole(role));
         return ResponseEntity
@@ -66,7 +72,11 @@ public class RoleController {
                 .body(roleModel);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", produces = "application/json")
+    @ApiResponses({
+            @ApiResponse(code = 409, message="Conflict with existent role's 'title' value"),
+            @ApiResponse(code = 422, message="Incorrect 'title' of request body")
+    })
     public ResponseEntity<EntityModel<Role>> replaceRole(@RequestBody @Valid Role newRole,
                                                          @PathVariable Long id) {
         EntityModel<Role> roleModel = assembler
