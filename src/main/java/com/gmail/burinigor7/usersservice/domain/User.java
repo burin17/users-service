@@ -1,5 +1,6 @@
 package com.gmail.burinigor7.usersservice.domain;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,10 +43,12 @@ public class User {
 
     @Column(name = "phone_number", nullable = false, unique = true)
     @Pattern(regexp = "^\\+7\\d{10}$", message = "incorrect 'phoneNumber'")
+    @ApiModelProperty(required = true)
     private String phoneNumber;
 
     @ManyToOne
     @JoinColumn(name = "user_role", nullable = false)
+    @ApiModelProperty(required = true)
     private Role role;
 
     @Column(nullable = false, unique = true)

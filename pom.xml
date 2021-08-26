@@ -19,6 +19,7 @@
         <lombok.version>1.18.20</lombok.version>
         <postgres.testcontainer>1.16.0</postgres.testcontainer>
         <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
+        <springfox.version>3.0.0</springfox.version>
     </properties>
     <dependencies>
         <dependency>
@@ -68,6 +69,10 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jsonwebtoken.version}</version>
+        </dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>${springfox.version}</version>
         </dependency>
     </dependencies>
 
