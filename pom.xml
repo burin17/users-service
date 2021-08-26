@@ -18,6 +18,7 @@
         <postgres.version>42.2.23</postgres.version>
         <lombok.version>1.18.20</lombok.version>
         <postgres.testcontainer>1.16.0</postgres.testcontainer>
+        <springfox.version>3.0.0</springfox.version>
     </properties>
     <dependencies>
         <dependency>
@@ -58,6 +59,11 @@
             <artifactId>postgresql</artifactId>
             <version>${postgres.testcontainer}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>${springfox.version}</version>
         </dependency>
     </dependencies>
 

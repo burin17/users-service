@@ -7,6 +7,8 @@ import com.gmail.burinigor7.usersservice.exception.UserRoleIdNotSpecifiedExcepti
 import com.gmail.burinigor7.usersservice.exception.UserRoleNotPresentedException;
 import com.gmail.burinigor7.usersservice.service.UserService;
 import com.gmail.burinigor7.usersservice.util.UserModelAssembler;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -39,13 +41,13 @@ public class UserController {
     private final UserService userService;
     private final UserModelAssembler assembler;
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = "application/json")
     public EntityModel<User> user(@PathVariable Long id) {
         User user = userService.user(id);
         return assembler.toModel(user);
     }
 
-    @GetMapping
+    @GetMapping(produces = "application/json")
     public CollectionModel<EntityModel<User>> all() {
         List<EntityModel<User>> userModels = StreamSupport
                 .stream(userService.all().spliterator(), false)
@@ -55,19 +57,19 @@ public class UserController {
                 linkTo(methodOn(UserController.class).all()).withSelfRel());
     }
 
-    @GetMapping(params = "email")
+    @GetMapping(params = "email", produces = "application/json")
     public EntityModel<User> userByEmail(@RequestParam String email) {
         User user = userService.userByEmail(email);
         return assembler.toModel(user);
     }
 
-    @GetMapping(params = "login")
+    @GetMapping(params = "login", produces = "application/json")
     public EntityModel<User> userByLogin(@RequestParam String login) {
         User user = userService.userByLogin(login);
         return assembler.toModel(user);
     }
 
-    @GetMapping("/filter-by-name")
+    @GetMapping(value = "/filter-by-name", produces = "application/json")
     public CollectionModel<EntityModel<User>> usersByName(
             @RequestParam(value = "first-name", required = false) String firstName,
             @RequestParam(value = "last-name", required = false) String lastName,
@@ -85,7 +87,7 @@ public class UserController {
                 linkTo(methodOn(UserController.class).all()).withRel(aggregateRootRel));
     }
 
-    @GetMapping(params = "role")
+    @GetMapping(params = "role", produces = "application/json")
     public CollectionModel<EntityModel<User>> usersByRole(@RequestParam Role role) {
         String aggregateRootRel = "users";
         List<EntityModel<User>> userModels = StreamSupport
@@ -99,21 +101,29 @@ public class UserController {
                         .withRel(aggregateRootRel));
     }
 
-    @GetMapping(params = "phone-number")
+    @GetMapping(params = "phone-number", produces = "application/json")
     public EntityModel<User> usersByPhoneNumber(
             @RequestParam("phone-number") String phoneNumber) {
         User user = userService.userByPhoneNumber(phoneNumber);
         return assembler.toModel(user);
     }
 
-    @PostMapping
+    @PostMapping(produces = "application/json")
+    @ApiResponses({
+            @ApiResponse(code = 409, message="Conflict with existent user's unique values"),
+            @ApiResponse(code = 422, message="Incorrect json properties(s) of request body")
+    })
     public ResponseEntity<EntityModel<User>> newUser(@RequestBody @Valid User user) {
         EntityModel<User> userModel = assembler.toModel(userService.newUser(user));
         return ResponseEntity.created(userModel.getRequiredLink(IanaLinkRelations.SELF)
                 .toUri()).body(userModel);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", produces = "application/json")
+    @ApiResponses({
+            @ApiResponse(code = 409, message="Conflict with existent user's unique values"),
+            @ApiResponse(code = 422, message="Incorrect json properties(s) of request body")
+    })
     public ResponseEntity<EntityModel<User>> replaceUser(@RequestBody @Valid User newUser,
                                                          @PathVariable Long id) {
         EntityModel<User> userModel = assembler.toModel(userService.replaceUser(newUser, id));
