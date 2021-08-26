@@ -3,9 +3,10 @@ package com.gmail.burinigor7.usersservice.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -56,4 +57,9 @@ public class User {
     @NotBlank(message = "'login' must not be blank")
     @Size(min = 4, message = "'login' must be longer then 3 characters")
     private String login;
+
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 }
