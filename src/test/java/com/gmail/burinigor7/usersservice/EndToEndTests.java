@@ -2,7 +2,9 @@ package com.gmail.burinigor7.usersservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gmail.burinigor7.usersservice.domain.Role;
+import com.gmail.burinigor7.usersservice.domain.Status;
 import com.gmail.burinigor7.usersservice.domain.User;
+import com.gmail.burinigor7.usersservice.dto.AuthenticationRequestDto;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,8 +64,13 @@ public class EndToEndTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private String authorizationHeaderValue;
+
     @Test
-    public void getUserById() throws Exception {
+    @Sql("classpath:db/admin_role_and_user.sql")
+    public void endToEndScenario() throws Exception {
+        authorizationHeaderValue = getAuthorizationHeader();
+
         // create, pull and assert role1
         createRole("Role1");
         JSONObject roleJsonObject = getRoleJsonObjectByTitle("Role1");
@@ -72,7 +80,7 @@ public class EndToEndTests {
         // create, pull and assert user with role1
         User user = new User(null, "Ivan", "Ivanov", "Petrovich",
                 "+79871111111", role1,
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
         createUser(user);
         JSONObject userJsonObjectWithRole1 = getUserJsonObjectByLogin("ivanov1");
         user.setId(userJsonObjectWithRole1.getLong("id"));
@@ -85,7 +93,7 @@ public class EndToEndTests {
         assertEquals("Role2", role2.getTitle());
 
         // check count of roles
-        assertEquals(2, countOfRoles());
+        assertEquals(3, countOfRoles());
 
         // replace user's role
         user.setRole(role2);
@@ -94,13 +102,25 @@ public class EndToEndTests {
         assertSingleUser(user, userJsonObjectWithRole2);
 
         // check count of users
-        assertEquals(1, countOfUsers());
+        assertEquals(2, countOfUsers());
 
         // delete user
         deleteUser(user.getId());
 
         // check count of users
-        assertEquals(0, countOfUsers());
+        assertEquals(1, countOfUsers());
+    }
+
+    private String getAuthorizationHeader() throws Exception {
+        MvcResult tokenMvcResult = mockMvc.perform(post("/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(
+                                new AuthenticationRequestDto("admin", "admin"))))
+                .andExpect(status().isOk())
+                .andReturn();
+        JSONObject jsonObject =
+                new JSONObject(tokenMvcResult.getResponse().getContentAsString());
+        return "Bearer_" + jsonObject.getString("token");
     }
 
     private void assertSingleUser(User user, JSONObject jsonObject) throws JSONException {
@@ -120,6 +140,7 @@ public class EndToEndTests {
     private void createRole(String roleTitle) throws Exception {
         Role role = new Role(null, roleTitle);
         mockMvc.perform(post("/roles")
+                        .header("Authorization", authorizationHeaderValue)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(role)))
                 .andExpect(status().isCreated());
@@ -127,6 +148,7 @@ public class EndToEndTests {
 
     private void createUser(User user) throws Exception {
         mockMvc.perform(post("/users")
+                        .header("Authorization", authorizationHeaderValue)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated());
@@ -134,6 +156,7 @@ public class EndToEndTests {
 
     private JSONObject getUserJsonObjectByLogin(String login) throws Exception {
         MvcResult mvcResult = mockMvc.perform(get("/users")
+                        .header("Authorization", authorizationHeaderValue)
                         .param("login", login))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -144,6 +167,7 @@ public class EndToEndTests {
 
     private JSONObject getRoleJsonObjectByTitle(String title) throws Exception {
         MvcResult mvcResult = mockMvc.perform(get("/roles")
+                        .header("Authorization", authorizationHeaderValue)
                         .param("title", title))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -154,13 +178,15 @@ public class EndToEndTests {
 
     private void replaceUser(User user) throws Exception {
         mockMvc.perform(put("/users/{userId}", user.getId())
+                        .header("Authorization", authorizationHeaderValue)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated());
     }
 
     private int countOfUsers() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get("/users"))
+        MvcResult mvcResult = mockMvc.perform(get("/users")
+                        .header("Authorization", authorizationHeaderValue))
                 .andExpect(status().isOk())
                 .andReturn();
         JSONObject jsonObject = new JSONObject(mvcResult.getResponse().getContentAsString());
@@ -173,7 +199,8 @@ public class EndToEndTests {
     }
 
     private int countOfRoles() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get("/roles"))
+        MvcResult mvcResult = mockMvc.perform(get("/roles")
+                        .header("Authorization", authorizationHeaderValue))
                 .andExpect(status().isOk())
                 .andReturn();
         JSONObject jsonObject = new JSONObject(mvcResult.getResponse().getContentAsString());
@@ -186,7 +213,8 @@ public class EndToEndTests {
     }
 
     private void deleteUser(long id) throws Exception{
-        mockMvc.perform(delete("/users/{userId}", id))
+        mockMvc.perform(delete("/users/{userId}", id)
+                        .header("Authorization", authorizationHeaderValue))
                 .andExpect(status().isNoContent());
     }
 }

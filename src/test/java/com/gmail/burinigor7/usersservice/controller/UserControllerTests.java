@@ -3,10 +3,12 @@ package com.gmail.burinigor7.usersservice.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gmail.burinigor7.usersservice.domain.Role;
+import com.gmail.burinigor7.usersservice.domain.Status;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.usersservice.exception.UserRoleIdNotSpecifiedException;
 import com.gmail.burinigor7.usersservice.exception.UserRoleNotPresentedException;
+import com.gmail.burinigor7.usersservice.security.JwtTokenProvider;
 import com.gmail.burinigor7.usersservice.service.UserService;
 import com.gmail.burinigor7.usersservice.util.RoleByTitleConverter;
 import com.gmail.burinigor7.usersservice.util.UserModelAssembler;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,12 +40,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTests {
     @MockBean
     private UserService userService;
 
     @MockBean
     private RoleByTitleConverter roleByTitleConverter;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider; // necessary for jwtSecurityConfig bean
 
     @Autowired
     private MockMvc mockMvc; // fake http requests sending
@@ -70,7 +77,7 @@ public class UserControllerTests {
         long userId = 1L;
         final User returnedByUserService = new User(null, "Ivan", "Ivanov", "Petrovich",
                 "89871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
 
         when(userService.user(userId)).thenReturn(returnedByUserService);
 
@@ -109,10 +116,10 @@ public class UserControllerTests {
         List<User> returnedByRoleService = List.of(
                 new User(1L, "Ivan", "Ivanov", "Petrovich",
                         "89871111111", new Role(1L, "User"),
-                        "test@email.com", "ivanov1"),
+                        "test@email.com", "ivanov1", "", Status.ACTIVE),
                 new User(2L, "Ivan", "Ivanov", "Petrovich",
                         "89871111112", new Role(1L, "User"),
-                        "test2@email.com", "ivanov2")
+                        "test2@email.com", "ivanov2", "", Status.ACTIVE)
         );
         when(userService.all()).thenReturn(returnedByRoleService);
 
@@ -136,7 +143,7 @@ public class UserControllerTests {
         String userEmail = "test@email.com";
         User returnedByUserService = new User(1L, "Ivan", "Ivanov", "Petrovich",
                 "89871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
 
         when(userService.userByEmail(userEmail)).thenReturn(returnedByUserService);
 
@@ -161,7 +168,7 @@ public class UserControllerTests {
         String userLogin = "ivanov1";
         User returnedByUserService = new User(1L, "Ivan", "Ivanov", "Petrovich",
                 "89871111111", new Role(1L, "User"),
-                "test@email.com", userLogin);
+                "test@email.com", userLogin, "", Status.ACTIVE);
 
         when(userService.userByLogin(userLogin)).thenReturn(returnedByUserService);
 
@@ -188,7 +195,7 @@ public class UserControllerTests {
         String patronymic = "Petrovich";
         List<User> returnedByUserService = List.of(new User(1L, firstName, lastName, patronymic,
                 "89871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1"));
+                "test@email.com", "ivanov1", "", Status.ACTIVE));
 
         when(userService.usersByName(firstName, lastName, patronymic)).thenReturn(returnedByUserService);
 
@@ -222,7 +229,7 @@ public class UserControllerTests {
         Role userRole = new Role(1L, "User");
         List<User> returnedByUserService = List.of(new User(1L, "Ivan", "Ivanov", "Petrovich",
                 "89871111111", userRole,
-                "test@email.com", "ivanov1"));
+                "test@email.com", "ivanov1", "", Status.ACTIVE));
 
         when(userService.usersByRole(userRole)).thenReturn(returnedByUserService);
         when(roleByTitleConverter.convert(userRole.getTitle())).thenReturn(userRole);
@@ -250,7 +257,7 @@ public class UserControllerTests {
         String phoneNumber = "89871111111";
         User returnedByUserService = new User(1L, "Ivan", "Ivanov", "Petrovich",
                 phoneNumber, new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
 
         when(userService.userByPhoneNumber(phoneNumber)).thenReturn(returnedByUserService);
 
@@ -274,11 +281,12 @@ public class UserControllerTests {
     public void newUser_whenValidInput_thenReturns201() throws Exception {
         User requestBodyPojo = new User(null, "Ivan", "Ivanov", "Petrovich",
                 "+79871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
         User returnedByRoleService = new User(1L, requestBodyPojo.getFirstName(),
                 requestBodyPojo.getLastName(), requestBodyPojo.getPatronymic(),
                 requestBodyPojo.getPhoneNumber(), requestBodyPojo.getRole(),
-                requestBodyPojo.getEmail(), requestBodyPojo.getLogin());
+                requestBodyPojo.getEmail(), requestBodyPojo.getLogin(),
+                requestBodyPojo.getPassword(), requestBodyPojo.getStatus());
 
         when(userService.newUser(requestBodyPojo)).thenReturn(returnedByRoleService);
 
@@ -312,11 +320,12 @@ public class UserControllerTests {
         long replacedUserId = 1L;
         User requestBodyPojo = new User(null, "Ivan", "Ivanov", "Petrovich",
                 "+79871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
         User returnedByRoleService = new User(replacedUserId, requestBodyPojo.getFirstName(),
                 requestBodyPojo.getLastName(), requestBodyPojo.getPatronymic(),
                 requestBodyPojo.getPhoneNumber(), requestBodyPojo.getRole(),
-                requestBodyPojo.getEmail(), requestBodyPojo.getLogin());
+                requestBodyPojo.getEmail(), requestBodyPojo.getLogin(),
+                requestBodyPojo.getPassword(), requestBodyPojo.getStatus());
 
         when(userService.replaceUser(requestBodyPojo, replacedUserId))
                 .thenReturn(returnedByRoleService);
@@ -353,7 +362,7 @@ public class UserControllerTests {
         long replacedUserId = -1L;
         User requestBodyPojo = new User(null, "Ivan", "Ivanov", "Petrovich",
                 "+79871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
 
         when(userService.replaceUser(requestBodyPojo, replacedUserId))
                 .thenThrow(UserNotFoundException.class);
@@ -395,7 +404,7 @@ public class UserControllerTests {
     public void newUser_whenInvalidUserPhoneNumber_thenReturns422() throws Exception {
         User requestBody = new User(null, "Ivan", "Ivanov", "Petrovich",
                 "123", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
 
         MvcResult mvcResult = mockMvc.perform(post("/users")
                         .contentType("application/json")
@@ -412,7 +421,7 @@ public class UserControllerTests {
     public void replaceUser_whenInvalidUserPhoneNumber_thenReturns422() throws Exception {
         User requestBody = new User(1L, "Ivan", "Ivanov", "Petrovich",
                 "123", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
 
         MvcResult mvcResult = mockMvc.perform(put("/users/{userId}", requestBody.getId())
                         .contentType("application/json")
@@ -429,7 +438,7 @@ public class UserControllerTests {
     public void newUser_whenUserRoleIdNotPresented_thenReturns422() throws Exception {
         User requestBody = new User(1L, "Ivan", "Ivanov", "Petrovich",
                 "+79999999999", new Role(null, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
 
         when(userService.newUser(requestBody))
                 .thenThrow(UserRoleIdNotSpecifiedException.class);
@@ -444,7 +453,7 @@ public class UserControllerTests {
     public void newUser_whenUserRoleNotExistent_thenReturns422() throws Exception {
         User requestBody = new User(1L, "Ivan", "Ivanov", "Petrovich",
                 "+79999999999", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
 
         when(userService.replaceUser(requestBody, requestBody.getId()))
                 .thenThrow(UserRoleNotPresentedException.class);

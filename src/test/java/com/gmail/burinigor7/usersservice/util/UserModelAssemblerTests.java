@@ -1,6 +1,7 @@
 package com.gmail.burinigor7.usersservice.util;
 
 import com.gmail.burinigor7.usersservice.domain.Role;
+import com.gmail.burinigor7.usersservice.domain.Status;
 import com.gmail.burinigor7.usersservice.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
@@ -15,7 +16,7 @@ public class UserModelAssemblerTests {
     public void toModel_ordinaryRoleAsArgument_correctEntityModel() {
         final User argument = new User(1L, "Ivan", "Ivanov", "Petrovich",
                 "89871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
         EntityModel<User> userModel = userModelAssembler.toModel(argument);
         assertEquals(userModel.getContent(), argument);
         userModel.getRequiredLink(IanaLinkRelations.SELF);

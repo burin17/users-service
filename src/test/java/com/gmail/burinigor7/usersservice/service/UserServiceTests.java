@@ -2,6 +2,7 @@ package com.gmail.burinigor7.usersservice.service;
 
 import com.gmail.burinigor7.usersservice.dao.UserRepository;
 import com.gmail.burinigor7.usersservice.domain.Role;
+import com.gmail.burinigor7.usersservice.domain.Status;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.usersservice.util.UserRoleValidator;
@@ -11,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -133,10 +135,10 @@ public class UserServiceTests {
     public void newUser_persistUser_returnUserWithSpecifiedDataAndWithId() {
         final User newUser = new User(null, "Ivan", "Ivanov", "Petrovich",
                 "89871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1");
+                "test@email.com", "ivanov1", "", Status.ACTIVE);
         final User persistedUser = new User(1L, newUser.getFirstName(), newUser.getLastName(),
                 newUser.getPatronymic(), newUser.getPhoneNumber(), newUser.getRole(),
-                newUser.getEmail(), newUser.getLogin());
+                newUser.getEmail(), newUser.getLogin(), newUser.getPassword(), newUser.getStatus());
         when(userRepository.save(newUser)).thenReturn(persistedUser);
         User returned = userService.newUser(newUser);
         assertEquals(persistedUser, returned);
