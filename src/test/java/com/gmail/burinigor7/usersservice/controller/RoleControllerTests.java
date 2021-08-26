@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gmail.burinigor7.usersservice.dao.RoleRepository;
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.exception.RoleNotFoundException;
+import com.gmail.burinigor7.usersservice.security.JwtTokenProvider;
 import com.gmail.burinigor7.usersservice.service.RoleService;
 import com.gmail.burinigor7.usersservice.util.RoleModelAssembler;
 import org.json.JSONObject;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,12 +36,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = RoleController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class RoleControllerTests {
     @MockBean
     private RoleService roleService;
 
     @MockBean
     private RoleRepository roleRepository; // necessary for roleByTitleConverter bean
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider; // necessary for jwtSecurityConfig bean
 
     @Autowired
     private MockMvc mockMvc; // fake http requests sending
