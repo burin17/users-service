@@ -1,6 +1,7 @@
 package com.gmail.burinigor7.usersservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gmail.burinigor7.usersservice.config.JacksonMapperConfig;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.dto.RegistrationDto;
 import com.gmail.burinigor7.usersservice.security.JwtTokenProvider;
@@ -11,9 +12,9 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = RegistrationController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@Import(JacksonMapperConfig.class)
 public class RegistrationControllerTests {
     @MockBean
     private UserService userService;
@@ -92,16 +93,11 @@ public class RegistrationControllerTests {
 
     private void assertResponseBody(JSONObject jsonObject, User returnedByUserService)
             throws JSONException {
-        assertEquals("null", jsonObject.getString("password"));
         assertEquals(returnedByUserService.getLogin(), jsonObject.getString("login"));
         assertEquals(returnedByUserService.getEmail(), jsonObject.getString("email"));
-        assertEquals(returnedByUserService.getRole().getId(),
-                jsonObject.getJSONObject("role").getLong("id"));
         assertEquals("null", jsonObject.getString("patronymic"));
         assertEquals(returnedByUserService.getFirstName(), jsonObject.getString("firstName"));
         assertEquals(returnedByUserService.getLastName(), jsonObject.getString("lastName"));
         assertEquals(returnedByUserService.getPhoneNumber(), jsonObject.getString("phoneNumber"));
-        assertEquals(returnedByUserService.getStatus().toString(),
-                jsonObject.getString("status"));
     }
 }

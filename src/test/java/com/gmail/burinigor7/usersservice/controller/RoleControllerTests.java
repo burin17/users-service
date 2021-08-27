@@ -1,4 +1,4 @@
-package com.gmail.burinigor7.usersservice.controller.admin;
+package com.gmail.burinigor7.usersservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,7 +75,7 @@ public class RoleControllerTests {
 
         when(roleService.role(roleId)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/roles/{roleId}", roleId))
+        MvcResult mvcResult = mockMvc.perform(get("/roles/{roleId}", roleId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -96,7 +96,7 @@ public class RoleControllerTests {
 
         when(roleService.role(roleId)).thenThrow(RoleNotFoundException.class);
 
-        mockMvc.perform(get("/admin/roles/{roleId}", roleId))
+        mockMvc.perform(get("/roles/{roleId}", roleId))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -111,7 +111,7 @@ public class RoleControllerTests {
                 new Role(2L, "Role2"));
         when(roleService.all()).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/roles"))
+        MvcResult mvcResult = mockMvc.perform(get("/roles"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -132,7 +132,7 @@ public class RoleControllerTests {
 
         when(roleService.roleByTitle(roleTitle)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/roles")
+        MvcResult mvcResult = mockMvc.perform(get("/roles")
                         .param("title", roleTitle))
                         .andExpect(status().isOk())
                         .andReturn();
@@ -155,7 +155,7 @@ public class RoleControllerTests {
 
         when(roleService.newRole(requestBodyPojo)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(post("/admin/roles")
+        MvcResult mvcResult = mockMvc.perform(post("/roles")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isCreated())
@@ -182,7 +182,7 @@ public class RoleControllerTests {
 
         when(roleService.replaceRole(requestBodyPojo, replacedRoleId)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(put("/admin/roles/{roleId}", replacedRoleId)
+        MvcResult mvcResult = mockMvc.perform(put("/roles/{roleId}", replacedRoleId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isCreated())
@@ -211,7 +211,7 @@ public class RoleControllerTests {
         when(roleService.replaceRole(requestBodyPojo, replacedRoleId))
                 .thenThrow(RoleNotFoundException.class);
 
-        mockMvc.perform(put("/admin/roles/{roleId}", replacedRoleId)
+        mockMvc.perform(put("/roles/{roleId}", replacedRoleId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isNotFound());
@@ -228,7 +228,7 @@ public class RoleControllerTests {
     public void deleteRole_whenValidInput_thenReturns204() throws Exception {
         long deletedRoleId = 1L;
 
-        mockMvc.perform(delete("/admin/roles/{roleId}", deletedRoleId))
+        mockMvc.perform(delete("/roles/{roleId}", deletedRoleId))
                 .andExpect(status().isNoContent());
 
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
@@ -240,7 +240,7 @@ public class RoleControllerTests {
     public void newRole_whenInvalidRoleTitle_thenReturns422() throws Exception {
         Role requestBody = new Role(1L, "a");
 
-        MvcResult mvcResult = mockMvc.perform(post("/admin/roles")
+        MvcResult mvcResult = mockMvc.perform(post("/roles")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity())
@@ -255,7 +255,7 @@ public class RoleControllerTests {
     public void replaceRole_whenInvalidRoleTitle_thenReturns422() throws Exception {
         Role requestBody = new Role(1L, "a");
 
-        MvcResult mvcResult = mockMvc.perform(put("/admin/roles/{roleId}", requestBody.getId())
+        MvcResult mvcResult = mockMvc.perform(put("/roles/{roleId}", requestBody.getId())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity())

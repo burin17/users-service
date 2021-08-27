@@ -7,9 +7,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
-import java.util.Set;
+import java.util.Collections;
 
 public class JwtUser implements UserDetails {
+    private static final String ROLE_PREFIX = "ROLE_";
+
     private final User user;
 
     public JwtUser(User user) {
@@ -18,7 +20,7 @@ public class JwtUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Set.of(mapRoleToGrantedAuthority(user.getRole()));
+        return Collections.singletonList(mapRoleToGrantedAuthority(user.getRole()));
     }
 
     @Override
@@ -51,7 +53,11 @@ public class JwtUser implements UserDetails {
         return user.getStatus() == Status.ACTIVE;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     private GrantedAuthority mapRoleToGrantedAuthority(Role role) {
-        return new SimpleGrantedAuthority(role.getTitle());
+        return new SimpleGrantedAuthority(ROLE_PREFIX + role.getTitle());
     }
 }

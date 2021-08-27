@@ -1,6 +1,5 @@
 package com.gmail.burinigor7.usersservice.controller;
 
-import com.gmail.burinigor7.usersservice.controller.admin.UserController;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.dto.RegistrationDto;
 import com.gmail.burinigor7.usersservice.service.UserService;
@@ -27,7 +26,6 @@ public class RegistrationController {
     @PostMapping
     public ResponseEntity<?> register(@RequestBody @Valid RegistrationDto dto) {
         User createdUser = userService.newUser(dto.toOrdinaryUser());
-        createdUser.setPassword(null);
         EntityModel<User> userModel =
                 EntityModel.of(createdUser,
                         Link.of("http://localhost:8080/auth/login", "login"),

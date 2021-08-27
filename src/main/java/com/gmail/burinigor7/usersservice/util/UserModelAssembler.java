@@ -1,6 +1,6 @@
 package com.gmail.burinigor7.usersservice.util;
 
-import com.gmail.burinigor7.usersservice.controller.admin.UserController;
+import com.gmail.burinigor7.usersservice.controller.UserController;
 import com.gmail.burinigor7.usersservice.domain.User;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;

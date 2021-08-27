@@ -1,4 +1,4 @@
-package com.gmail.burinigor7.usersservice.controller.admin;
+package com.gmail.burinigor7.usersservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -81,7 +81,7 @@ public class UserControllerTests {
 
         when(userService.user(userId)).thenReturn(returnedByUserService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/users/{userId}", userId))
+        MvcResult mvcResult = mockMvc.perform(get("/users/{userId}", userId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -102,7 +102,7 @@ public class UserControllerTests {
 
         when(userService.user(userId)).thenThrow(UserNotFoundException.class);
 
-        mockMvc.perform(get("/admin/users/{userId}", userId))
+        mockMvc.perform(get("/users/{userId}", userId))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -123,7 +123,7 @@ public class UserControllerTests {
         );
         when(userService.all()).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/users"))
+        MvcResult mvcResult = mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -147,7 +147,7 @@ public class UserControllerTests {
 
         when(userService.userByEmail(userEmail)).thenReturn(returnedByUserService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/users")
+        MvcResult mvcResult = mockMvc.perform(get("/users")
                         .param("email", userEmail))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -172,7 +172,7 @@ public class UserControllerTests {
 
         when(userService.userByLogin(userLogin)).thenReturn(returnedByUserService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/users")
+        MvcResult mvcResult = mockMvc.perform(get("/users")
                         .param("login", userLogin))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -199,7 +199,7 @@ public class UserControllerTests {
 
         when(userService.usersByName(firstName, lastName, patronymic)).thenReturn(returnedByUserService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/users/filter-by-name")
+        MvcResult mvcResult = mockMvc.perform(get("/users/filter-by-name")
                         .param("first-name", firstName)
                         .param("last-name", lastName)
                         .param("patronymic", patronymic))
@@ -234,7 +234,7 @@ public class UserControllerTests {
         when(userService.usersByRole(userRole)).thenReturn(returnedByUserService);
         when(roleByTitleConverter.convert(userRole.getTitle())).thenReturn(userRole);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/users")
+        MvcResult mvcResult = mockMvc.perform(get("/users")
                         .param("role", userRole.getTitle()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -261,7 +261,7 @@ public class UserControllerTests {
 
         when(userService.userByPhoneNumber(phoneNumber)).thenReturn(returnedByUserService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/admin/users")
+        MvcResult mvcResult = mockMvc.perform(get("/users")
                         .param("phone-number", phoneNumber))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -290,7 +290,7 @@ public class UserControllerTests {
 
         when(userService.newUser(requestBodyPojo)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(post("/admin/users")
+        MvcResult mvcResult = mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isCreated())
@@ -330,7 +330,7 @@ public class UserControllerTests {
         when(userService.replaceUser(requestBodyPojo, replacedUserId))
                 .thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(put("/admin/users/{userId}", replacedUserId)
+        MvcResult mvcResult = mockMvc.perform(put("/users/{userId}", replacedUserId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isCreated())
@@ -367,7 +367,7 @@ public class UserControllerTests {
         when(userService.replaceUser(requestBodyPojo, replacedUserId))
                 .thenThrow(UserNotFoundException.class);
 
-        mockMvc.perform(put("/admin/users/{userId}", replacedUserId)
+        mockMvc.perform(put("/users/{userId}", replacedUserId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isNotFound())
@@ -392,7 +392,7 @@ public class UserControllerTests {
     public void deleteRole_whenValidInput_thenReturns204() throws Exception {
         long deleteUserId = 1L;
 
-        mockMvc.perform(delete("/admin/users/{userId}", deleteUserId))
+        mockMvc.perform(delete("/users/{userId}", deleteUserId))
                 .andExpect(status().isNoContent());
 
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
@@ -406,7 +406,7 @@ public class UserControllerTests {
                 "123", new Role(1L, "User"),
                 "test@email.com", "ivanov1", "", Status.ACTIVE);
 
-        MvcResult mvcResult = mockMvc.perform(post("/admin/users")
+        MvcResult mvcResult = mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity())
@@ -423,7 +423,7 @@ public class UserControllerTests {
                 "123", new Role(1L, "User"),
                 "test@email.com", "ivanov1", "", Status.ACTIVE);
 
-        MvcResult mvcResult = mockMvc.perform(put("/admin/users/{userId}", requestBody.getId())
+        MvcResult mvcResult = mockMvc.perform(put("/users/{userId}", requestBody.getId())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity())
@@ -443,7 +443,7 @@ public class UserControllerTests {
         when(userService.newUser(requestBody))
                 .thenThrow(UserRoleIdNotSpecifiedException.class);
 
-        mockMvc.perform(post("/admin/users")
+        mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity());
@@ -458,7 +458,7 @@ public class UserControllerTests {
         when(userService.replaceUser(requestBody, requestBody.getId()))
                 .thenThrow(UserRoleNotPresentedException.class);
 
-        mockMvc.perform(put("/admin/users/{userId}", requestBody.getId())
+        mockMvc.perform(put("/users/{userId}", requestBody.getId())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity());

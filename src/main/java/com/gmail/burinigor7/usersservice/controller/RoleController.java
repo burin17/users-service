@@ -1,4 +1,4 @@
-package com.gmail.burinigor7.usersservice.controller.admin;
+package com.gmail.burinigor7.usersservice.controller;
 
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.exception.RoleNotFoundException;
@@ -33,9 +33,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/admin/roles")
+@RequestMapping("/roles")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
     private final RoleService roleService;
     private final RoleModelAssembler assembler;
