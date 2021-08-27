@@ -1,4 +1,4 @@
-package com.gmail.burinigor7.usersservice.controller;
+package com.gmail.burinigor7.usersservice.controller.admin;
 
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.exception.RoleNotFoundException;
@@ -12,6 +12,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,8 +33,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/roles")
+@RequestMapping("/admin/roles")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('ADMIN')")
 public class RoleController {
     private final RoleService roleService;
     private final RoleModelAssembler assembler;

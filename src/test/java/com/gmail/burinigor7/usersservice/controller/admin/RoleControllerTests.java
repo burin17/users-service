@@ -1,4 +1,4 @@
-package com.gmail.burinigor7.usersservice.controller;
+package com.gmail.burinigor7.usersservice.controller.admin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,12 +13,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = RoleController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("web-layer-test")
 public class RoleControllerTests {
     @MockBean
     private RoleService roleService;
@@ -75,7 +75,7 @@ public class RoleControllerTests {
 
         when(roleService.role(roleId)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/roles/{roleId}", roleId))
+        MvcResult mvcResult = mockMvc.perform(get("/admin/roles/{roleId}", roleId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -96,7 +96,7 @@ public class RoleControllerTests {
 
         when(roleService.role(roleId)).thenThrow(RoleNotFoundException.class);
 
-        mockMvc.perform(get("/roles/{roleId}", roleId))
+        mockMvc.perform(get("/admin/roles/{roleId}", roleId))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -111,7 +111,7 @@ public class RoleControllerTests {
                 new Role(2L, "Role2"));
         when(roleService.all()).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/roles"))
+        MvcResult mvcResult = mockMvc.perform(get("/admin/roles"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -132,7 +132,7 @@ public class RoleControllerTests {
 
         when(roleService.roleByTitle(roleTitle)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(get("/roles")
+        MvcResult mvcResult = mockMvc.perform(get("/admin/roles")
                         .param("title", roleTitle))
                         .andExpect(status().isOk())
                         .andReturn();
@@ -155,7 +155,7 @@ public class RoleControllerTests {
 
         when(roleService.newRole(requestBodyPojo)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(post("/roles")
+        MvcResult mvcResult = mockMvc.perform(post("/admin/roles")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isCreated())
@@ -182,7 +182,7 @@ public class RoleControllerTests {
 
         when(roleService.replaceRole(requestBodyPojo, replacedRoleId)).thenReturn(returnedByRoleService);
 
-        MvcResult mvcResult = mockMvc.perform(put("/roles/{roleId}", replacedRoleId)
+        MvcResult mvcResult = mockMvc.perform(put("/admin/roles/{roleId}", replacedRoleId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isCreated())
@@ -211,7 +211,7 @@ public class RoleControllerTests {
         when(roleService.replaceRole(requestBodyPojo, replacedRoleId))
                 .thenThrow(RoleNotFoundException.class);
 
-        mockMvc.perform(put("/roles/{roleId}", replacedRoleId)
+        mockMvc.perform(put("/admin/roles/{roleId}", replacedRoleId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBodyPojo)))
                 .andExpect(status().isNotFound());
@@ -228,7 +228,7 @@ public class RoleControllerTests {
     public void deleteRole_whenValidInput_thenReturns204() throws Exception {
         long deletedRoleId = 1L;
 
-        mockMvc.perform(delete("/roles/{roleId}", deletedRoleId))
+        mockMvc.perform(delete("/admin/roles/{roleId}", deletedRoleId))
                 .andExpect(status().isNoContent());
 
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
@@ -240,7 +240,7 @@ public class RoleControllerTests {
     public void newRole_whenInvalidRoleTitle_thenReturns422() throws Exception {
         Role requestBody = new Role(1L, "a");
 
-        MvcResult mvcResult = mockMvc.perform(post("/roles")
+        MvcResult mvcResult = mockMvc.perform(post("/admin/roles")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity())
@@ -255,7 +255,7 @@ public class RoleControllerTests {
     public void replaceRole_whenInvalidRoleTitle_thenReturns422() throws Exception {
         Role requestBody = new Role(1L, "a");
 
-        MvcResult mvcResult = mockMvc.perform(put("/roles/{roleId}", requestBody.getId())
+        MvcResult mvcResult = mockMvc.perform(put("/admin/roles/{roleId}", requestBody.getId())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity())

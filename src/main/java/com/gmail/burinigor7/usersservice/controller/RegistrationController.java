@@ -1,5 +1,6 @@
 package com.gmail.burinigor7.usersservice.controller;
 
+import com.gmail.burinigor7.usersservice.controller.admin.UserController;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.dto.RegistrationDto;
 import com.gmail.burinigor7.usersservice.service.UserService;
