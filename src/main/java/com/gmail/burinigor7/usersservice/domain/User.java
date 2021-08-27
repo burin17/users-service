@@ -1,6 +1,5 @@
 package com.gmail.burinigor7.usersservice.domain;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +16,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -27,7 +27,8 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class User {
     @Id
-    @SequenceGenerator(name = "usr_seq", sequenceName = "usr_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "usr_seq", sequenceName = "usr_id_seq", allocationSize = 1,
+            initialValue = 2)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usr_seq")
     private Long id;
 
@@ -43,12 +44,12 @@ public class User {
 
     @Column(name = "phone_number", nullable = false, unique = true)
     @Pattern(regexp = "^\\+7\\d{10}$", message = "incorrect 'phoneNumber'")
-    @ApiModelProperty(required = true)
+    @NotNull
     private String phoneNumber;
 
     @ManyToOne
     @JoinColumn(name = "user_role", nullable = false)
-    @ApiModelProperty(required = true)
+    @NotNull
     private Role role;
 
     @Column(nullable = false, unique = true)
@@ -61,6 +62,9 @@ public class User {
     @Size(min = 4, message = "'login' must be longer then 3 characters")
     private String login;
 
+    @Column(nullable = false)
+    @NotBlank(message = "'password' must not be blank")
+    @Size(min = 4, message = "'password' must be longer then 3 characters")
     private String password;
 
     @Enumerated(EnumType.STRING)

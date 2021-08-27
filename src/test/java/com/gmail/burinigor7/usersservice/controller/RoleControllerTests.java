@@ -69,7 +69,7 @@ public class RoleControllerTests {
     }
 
     @Test
-    public void role_whenValidInput_thenReturns_200() throws Exception {
+    public void role_whenValidInput_thenReturns200() throws Exception {
         long roleId = 1L;
         Role returnedByRoleService = new Role(roleId, "Role1");
 
