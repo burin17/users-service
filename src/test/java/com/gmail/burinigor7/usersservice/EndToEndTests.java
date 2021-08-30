@@ -9,17 +9,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,29 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class EndToEndTests {
 
-    @TestConfiguration
-    static class PostgreSQLContainerConfig {
-        @Value("${testcontainer.postgresql.image}")
-        private String imageName;
-
-        @Value("${testcontainer.postgresql.database}")
-        private String databaseName;
-
-        @Value("${spring.datasource.username}")
-        private String username;
-
-        @Value("${spring.datasource.password}")
-        private String password;
-
-        @Bean
-        public PostgreSQLContainer postgreSQLContainer() {
-            return new PostgreSQLContainer(imageName)
-                    .withDatabaseName(databaseName)
-                    .withUsername(username)
-                    .withPassword(password);
-        }
-    }
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -73,6 +46,9 @@ public class EndToEndTests {
     @Test
     public void endToEndScenario() throws Exception {
         authorizationHeaderValue = getAuthorizationHeader();
+
+        // check current user; '/self' url
+        isAdminCurrentUser();
 
         // create, pull and assert role1
         createRole("Role1");
@@ -141,6 +117,17 @@ public class EndToEndTests {
         jsonObject.getLong("id"); // exception thrown is id not presented
         assertNotNull(jsonObject.getJSONObject("_links").getJSONObject("self"));
         assertNotNull(jsonObject.getJSONObject("_links").getJSONObject("users"));
+    }
+
+    private void isAdminCurrentUser() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get("/users/self")
+                        .header("Authorization", authorizationHeaderValue))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = mvcResult.getResponse().getContentAsString();
+        JSONObject jsonObject = new JSONObject(json);
+        assertEquals(1L, jsonObject.getLong("id"));
     }
 
     private void createRole(String roleTitle) throws Exception {

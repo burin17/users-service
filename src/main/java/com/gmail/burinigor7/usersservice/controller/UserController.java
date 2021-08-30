@@ -145,6 +145,23 @@ public class UserController {
                 .toUri()).body(userModel);
     }
 
+    @PutMapping(value = "/self", produces = "application/json")
+    @ApiResponses({
+            @ApiResponse(code = 409, message="Conflict with existent user's unique values"),
+            @ApiResponse(code = 422, message="Incorrect json properties(s) of request body")
+    })
+    public ResponseEntity<EntityModel<User>> modifySelf(@RequestBody @Valid User newUser,
+                                                        Authentication authentication) {
+        User user = ((JwtUser) authentication.getPrincipal()).getUser();
+        newUser.setPassword(user.getPassword());
+        newUser.setRole(user.getRole());
+        newUser.setStatus(user.getStatus());
+        newUser.setId(user.getId());
+        EntityModel<User> userModel = assembler.toModel(userService.replaceUser(newUser, user.getId()));
+        return ResponseEntity.created(userModel.getRequiredLink(IanaLinkRelations.SELF)
+                .toUri()).body(userModel);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
