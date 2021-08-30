@@ -1,15 +1,18 @@
 package com.gmail.burinigor7.usersservice.service;
 
+import com.gmail.burinigor7.usersservice.api.AdminDeletionApi;
 import com.gmail.burinigor7.usersservice.dao.UserRepository;
 import com.gmail.burinigor7.usersservice.domain.Role;
 import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.usersservice.util.UserRoleValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +20,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserRoleValidator userRoleValidator;
     private final PasswordEncoder passwordEncoder;
+    private final AdminDeletionApi adminDeletionApi;
+
+    @Value("${admin-deletion-service.url.check}")
+    private String isAllowed;
 
     public User user(Long id) {
         return userRepository.findById(id)
@@ -72,8 +79,9 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            deleteUser(user.get());
         } else {
             throw new UserNotFoundException(id);
         }
@@ -90,5 +98,16 @@ public class UserService {
         fetched.setPassword(newUser.getPassword());
         fetched.setStatus(newUser.getStatus());
         return fetched;
+    }
+
+    private void deleteUser(User user) {
+        final String adminRoleTitle = "ADMIN";
+        if (user.getRole().getTitle().equals(adminRoleTitle)) {
+            if (adminDeletionApi.isAllowed(isAllowed, 1L)) {
+                userRepository.delete(user);
+            }
+        } else {
+            userRepository.delete(user);
+        }
     }
 }
