@@ -4,6 +4,7 @@ import com.gmail.burinigor7.userscrudservice.domain.User;
 import com.gmail.burinigor7.userscrudservice.dto.RegistrationDto;
 import com.gmail.burinigor7.userscrudservice.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -23,12 +24,17 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class RegistrationController {
     private final UserService userService;
 
+    @Value("${url.login}")
+    private String loginHref;
+
     @PostMapping
     public ResponseEntity<?> register(@RequestBody @Valid RegistrationDto dto) {
         User createdUser = userService.newUser(dto.toOrdinaryUser());
+        loginHref = "http://localhost:8080/auth/login";
+        String loginRel = "login";
         EntityModel<User> userModel =
                 EntityModel.of(createdUser,
-                        Link.of("http://localhost:8080/auth/login", "login"),
+                        Link.of(loginHref, loginRel),
                         linkTo(methodOn(UserController.class).user(createdUser.getId()))
                                 .withSelfRel());
         return ResponseEntity.status(HttpStatus.CREATED).body(userModel);
