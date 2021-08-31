@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gmail.burinigor7.userscrudservice.domain.Role;
 import com.gmail.burinigor7.userscrudservice.domain.Status;
 import com.gmail.burinigor7.userscrudservice.domain.User;
+import com.gmail.burinigor7.userscrudservice.exception.AdminDeletionServiceNotAccessibleException;
+import com.gmail.burinigor7.userscrudservice.exception.NoGrantsToDeleteAdminException;
 import com.gmail.burinigor7.userscrudservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.userscrudservice.exception.UserRoleIdNotSpecifiedException;
 import com.gmail.burinigor7.userscrudservice.exception.UserRoleNotPresentedException;
@@ -30,6 +32,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -462,6 +465,40 @@ public class UserControllerTests {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void deleteUser_whenUserNotExists_thenReturns404()
+            throws Exception {
+        long deletedUserId = 1L;
+
+        doThrow(UserNotFoundException.class).when(userService).deleteUser(deletedUserId);
+
+        mockMvc.perform(delete("/users/{userId}", deletedUserId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteUser_whenAdminDeletionServiceNotAccessibleExceptionThrown_thenReturns503()
+            throws Exception {
+        long deletedUserId = 1L;
+
+        doThrow(AdminDeletionServiceNotAccessibleException.class).when(userService)
+                .deleteUser(deletedUserId);
+
+        mockMvc.perform(delete("/users/{userId}", deletedUserId))
+                .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    public void deleteUser_whenNoGrantsToDeleteAdminExceptionThrown_thenReturns403()
+            throws Exception {
+        long deletedUserId = 1L;
+
+        doThrow(NoGrantsToDeleteAdminException.class).when(userService).deleteUser(deletedUserId);
+
+        mockMvc.perform(delete("/users/{userId}", deletedUserId))
+                .andExpect(status().isForbidden());
     }
 
     private String payloadOfHalResponse(User pojo) throws JsonProcessingException {

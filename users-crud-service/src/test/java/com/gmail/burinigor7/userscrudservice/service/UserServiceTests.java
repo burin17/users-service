@@ -1,9 +1,11 @@
 package com.gmail.burinigor7.userscrudservice.service;
 
+import com.gmail.burinigor7.userscrudservice.api.AdminDeletionApi;
 import com.gmail.burinigor7.userscrudservice.dao.UserRepository;
 import com.gmail.burinigor7.userscrudservice.domain.Role;
 import com.gmail.burinigor7.userscrudservice.domain.Status;
 import com.gmail.burinigor7.userscrudservice.domain.User;
+import com.gmail.burinigor7.userscrudservice.exception.NoGrantsToDeleteAdminException;
 import com.gmail.burinigor7.userscrudservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.userscrudservice.util.UserRoleValidator;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,9 +36,13 @@ public class UserServiceTests {
     @Mock
     private UserRoleValidator userRoleValidator;
 
+    @Mock
+    private AdminDeletionApi adminDeletionApi;
+
     @Spy
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    @Spy
     @InjectMocks
     private UserService userService;
 
@@ -182,15 +191,48 @@ public class UserServiceTests {
     @Test
     public void deleteUser_whenUserExists_thenNoExceptionThrown() {
         long id = 1L;
-        when(userRepository.existsById(id)).thenReturn(true);
+        User persistent = new User();
+        persistent.setId(id);
+        persistent.setRole(new Role(2L, "USER"));
+        when(userRepository.findById(id)).thenReturn(Optional.of(persistent));
         userService.deleteUser(id);
     }
 
     @Test
     public void deleteUser_whenUserNotExists_thenExceptionThrown() {
         long id = 1L;
-        when(userRepository.existsById(id)).thenReturn(false);
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class,
                 () -> userService.deleteUser(id));
+    }
+
+    @Test
+    public void deleteUser_whenGrantedAdminDeleteAnotherAdmin_thenNoExceptionThrown() {
+        long deletedUserId = 1L;
+        long currentUserId = 2L;
+        User persistent = new User();
+        persistent.setId(deletedUserId);
+        persistent.setRole(new Role(1L, "ADMIN"));
+        when(userRepository.findById(deletedUserId)).thenReturn(Optional.of(persistent));
+        doReturn(currentUserId).when(userService).getIdOfAuthenticatedUser();
+        when(adminDeletionApi.isAllowed(currentUserId)).thenReturn(true);
+        userService.deleteUser(deletedUserId);
+        verify(userService, times(1)).getIdOfAuthenticatedUser();
+    }
+
+    @Test
+    public void deleteUser_whenNotGrantedAdminDeleteAnotherAdmin_thenExceptionThrown() {
+        long deletedUserId = 1L;
+        long currentUserId = 10L;
+        User persistent = new User();
+        persistent.setId(deletedUserId);
+        persistent.setRole(new Role(1L, "ADMIN"));
+        when(userRepository.findById(deletedUserId)).thenReturn(Optional.of(persistent));
+        doReturn(currentUserId).when(userService).getIdOfAuthenticatedUser();
+        when(adminDeletionApi.isAllowed(currentUserId)).thenReturn(false);
+        assertThrows(NoGrantsToDeleteAdminException.class, () -> {
+            userService.deleteUser(deletedUserId);
+        });
+        verify(userService, times(1)).getIdOfAuthenticatedUser();
     }
 }

@@ -9,7 +9,6 @@ import com.gmail.burinigor7.userscrudservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.userscrudservice.security.JwtUser;
 import com.gmail.burinigor7.userscrudservice.util.UserRoleValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,9 +23,6 @@ public class UserService {
     private final UserRoleValidator userRoleValidator;
     private final PasswordEncoder passwordEncoder;
     private final AdminDeletionApi adminDeletionApi;
-
-    @Value("${admin-deletion-service.url.check}")
-    private String isAllowed;
 
     public User user(Long id) {
         return userRepository.findById(id)
@@ -106,9 +102,8 @@ public class UserService {
     private void deleteUser(User user) {
         final String adminRoleTitle = "ADMIN";
         if (user.getRole().getTitle().equals(adminRoleTitle)) {
-            long id = ((JwtUser) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getUser().getId();
-            if (adminDeletionApi.isAllowed(isAllowed, id)) {
+            long id = getIdOfAuthenticatedUser();
+            if (adminDeletionApi.isAllowed(id)) {
                 userRepository.delete(user);
             } else {
                 throw new NoGrantsToDeleteAdminException(
@@ -117,5 +112,10 @@ public class UserService {
         } else {
             userRepository.delete(user);
         }
+    }
+
+    Long getIdOfAuthenticatedUser() {
+        return ((JwtUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal()).getUser().getId();
     }
 }

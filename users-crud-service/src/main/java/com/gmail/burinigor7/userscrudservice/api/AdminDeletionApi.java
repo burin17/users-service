@@ -2,6 +2,7 @@ package com.gmail.burinigor7.userscrudservice.api;
 
 import com.gmail.burinigor7.userscrudservice.exception.AdminDeletionServiceNotAccessibleException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -14,13 +15,16 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AdminDeletionApi {
     private final RestTemplate restTemplate;
-    private final Set<Long> cache = new HashSet<>();
+    private Set<Long> cache = new HashSet<>();
+
+    @Value("${admin-deletion-service.url.check}")
+    private String url;
 
     @Retryable(value = ResourceAccessException.class)
-    public boolean isAllowed(String url, Long id) {
+    public boolean isAllowed(Long id) {
         boolean res = Boolean.TRUE.equals(restTemplate.getForObject(url, boolean.class, id));
         if (res) {
-           cache.add(id);
+            cache.add(id);
         } else {
             cache.remove(id);
         }
@@ -34,5 +38,9 @@ public class AdminDeletionApi {
             return true;
         }
         throw new AdminDeletionServiceNotAccessibleException("Requested api not accessible.");
+    }
+
+    Set<Long> getCache() {
+        return cache;
     }
 }
