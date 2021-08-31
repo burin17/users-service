@@ -4,6 +4,7 @@ import com.gmail.burinigor7.userscrudservice.api.AdminDeletionApi;
 import com.gmail.burinigor7.userscrudservice.dao.UserRepository;
 import com.gmail.burinigor7.userscrudservice.domain.Role;
 import com.gmail.burinigor7.userscrudservice.domain.User;
+import com.gmail.burinigor7.userscrudservice.exception.NoGrantsToDeleteAdminException;
 import com.gmail.burinigor7.userscrudservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.userscrudservice.security.JwtUser;
 import com.gmail.burinigor7.userscrudservice.util.UserRoleValidator;
@@ -109,6 +110,9 @@ public class UserService {
                     .getPrincipal()).getUser().getId();
             if (adminDeletionApi.isAllowed(isAllowed, id)) {
                 userRepository.delete(user);
+            } else {
+                throw new NoGrantsToDeleteAdminException(
+                        "Admin with id = " + id + " hasn't grants to delete another admin.");
             }
         } else {
             userRepository.delete(user);

@@ -2,6 +2,8 @@ package com.gmail.burinigor7.userscrudservice.controller;
 
 import com.gmail.burinigor7.userscrudservice.domain.Role;
 import com.gmail.burinigor7.userscrudservice.domain.User;
+import com.gmail.burinigor7.userscrudservice.exception.AdminDeletionServiceNotAccessibleException;
+import com.gmail.burinigor7.userscrudservice.exception.NoGrantsToDeleteAdminException;
 import com.gmail.burinigor7.userscrudservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.userscrudservice.exception.UserRoleIdNotSpecifiedException;
 import com.gmail.burinigor7.userscrudservice.exception.UserRoleNotPresentedException;
@@ -181,6 +183,19 @@ public class UserController {
     })
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String userRoleExceptionsHandler(Exception exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(NoGrantsToDeleteAdminException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String noGrantsToDeleteAdminExceptionHandler(NoGrantsToDeleteAdminException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(AdminDeletionServiceNotAccessibleException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE) // 503
+    public String adminDeletionServiceNotAccessibleExceptionHandler(
+            AdminDeletionServiceNotAccessibleException exception) {
         return exception.getMessage();
     }
 }
