@@ -13,12 +13,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = RoleController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("web-layer-test")
 public class RoleControllerTests {
     @MockBean
     private RoleService roleService;
@@ -69,7 +69,7 @@ public class RoleControllerTests {
     }
 
     @Test
-    public void role_whenValidInput_thenReturns_200() throws Exception {
+    public void role_whenValidInput_thenReturns200() throws Exception {
         long roleId = 1L;
         Role returnedByRoleService = new Role(roleId, "Role1");
 

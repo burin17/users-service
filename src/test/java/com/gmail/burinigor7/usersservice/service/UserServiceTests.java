@@ -10,9 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +30,9 @@ public class UserServiceTests {
 
     @Mock
     private UserRoleValidator userRoleValidator;
+
+    @Spy
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @InjectMocks
     private UserService userService;
@@ -135,10 +140,11 @@ public class UserServiceTests {
     public void newUser_persistUser_returnUserWithSpecifiedDataAndWithId() {
         final User newUser = new User(null, "Ivan", "Ivanov", "Petrovich",
                 "89871111111", new Role(1L, "User"),
-                "test@email.com", "ivanov1", "", Status.ACTIVE);
+                "test@email.com", "ivanov1", "pass", Status.ACTIVE);
         final User persistedUser = new User(1L, newUser.getFirstName(), newUser.getLastName(),
                 newUser.getPatronymic(), newUser.getPhoneNumber(), newUser.getRole(),
                 newUser.getEmail(), newUser.getLogin(), newUser.getPassword(), newUser.getStatus());
+
         when(userRepository.save(newUser)).thenReturn(persistedUser);
         User returned = userService.newUser(newUser);
         assertEquals(persistedUser, returned);
@@ -154,6 +160,7 @@ public class UserServiceTests {
         persistent.setLogin(newUserLogin);
         final User passed = new User();
         passed.setLogin(newUserLogin);
+        passed.setPassword("pass");
         when(userRepository.findById(userId)).thenReturn(Optional.of(persistent));
         when(userRepository.save(persistent)).thenReturn(persistent);
         User returned = userService.replaceUser(passed, userId);
@@ -166,6 +173,7 @@ public class UserServiceTests {
         final String newUserLogin = "NewUserLogin";
         final User passed = new User();
         passed.setLogin(newUserLogin);
+        passed.setPassword("pass");
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class, () -> userService
                 .replaceUser(passed, userId));

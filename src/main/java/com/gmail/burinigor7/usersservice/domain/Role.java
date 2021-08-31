@@ -20,7 +20,8 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class Role {
     @Id
-    @SequenceGenerator(name = "role_seq", sequenceName = "usr_role_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "role_seq", sequenceName = "usr_role_id_seq", allocationSize = 1,
+            initialValue = 3)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_seq")
     private Long id;
 

@@ -1,0 +1,3 @@
+insert into usr_role(id, title) values (1, 'ADMIN') on conflict do nothing;
+insert into usr_role(id, title) values (2, 'USER') on conflict do nothing;
+insert into usr(id, email, first_name, last_name, login, password, patronymic, phone_number, status, user_role) values (1, 'admin@email.com', 'admin', 'admin', 'admin', '$2a$12$abqdqjGMFUWEKrWKp.aGN.QCSjWXw.3CtWhUMSL3N5/uY9MEMVSRW', null, '+70000000000', 'ACTIVE', 1) on conflict do nothing;

@@ -5,6 +5,7 @@ import com.gmail.burinigor7.usersservice.domain.User;
 import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.usersservice.exception.UserRoleIdNotSpecifiedException;
 import com.gmail.burinigor7.usersservice.exception.UserRoleNotPresentedException;
+import com.gmail.burinigor7.usersservice.security.JwtUser;
 import com.gmail.burinigor7.usersservice.service.UserService;
 import com.gmail.burinigor7.usersservice.util.UserModelAssembler;
 import io.swagger.annotations.ApiResponse;
@@ -15,6 +16,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +43,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserController {
     private final UserService userService;
     private final UserModelAssembler assembler;
+
+    @GetMapping("/self")
+    public EntityModel<User> selfUser(Authentication authentication) {
+        User user = ((JwtUser) authentication.getPrincipal()).getUser();
+        return EntityModel.of(user,
+                linkTo(methodOn(UserController.class).selfUser(authentication)).withSelfRel(),
+                linkTo(methodOn(UserController.class).all()).withRel("users"));
+    }
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public EntityModel<User> user(@PathVariable Long id) {
@@ -88,6 +99,7 @@ public class UserController {
     }
 
     @GetMapping(params = "role", produces = "application/json")
+    @PreAuthorize("hasRole('ADMIN')")
     public CollectionModel<EntityModel<User>> usersByRole(@RequestParam Role role) {
         String aggregateRootRel = "users";
         List<EntityModel<User>> userModels = StreamSupport
@@ -113,6 +125,7 @@ public class UserController {
             @ApiResponse(code = 409, message="Conflict with existent user's unique values"),
             @ApiResponse(code = 422, message="Incorrect json properties(s) of request body")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EntityModel<User>> newUser(@RequestBody @Valid User user) {
         EntityModel<User> userModel = assembler.toModel(userService.newUser(user));
         return ResponseEntity.created(userModel.getRequiredLink(IanaLinkRelations.SELF)
@@ -124,6 +137,7 @@ public class UserController {
             @ApiResponse(code = 409, message="Conflict with existent user's unique values"),
             @ApiResponse(code = 422, message="Incorrect json properties(s) of request body")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EntityModel<User>> replaceUser(@RequestBody @Valid User newUser,
                                                          @PathVariable Long id) {
         EntityModel<User> userModel = assembler.toModel(userService.replaceUser(newUser, id));
@@ -131,7 +145,25 @@ public class UserController {
                 .toUri()).body(userModel);
     }
 
+    @PutMapping(value = "/self", produces = "application/json")
+    @ApiResponses({
+            @ApiResponse(code = 409, message="Conflict with existent user's unique values"),
+            @ApiResponse(code = 422, message="Incorrect json properties(s) of request body")
+    })
+    public ResponseEntity<EntityModel<User>> modifySelf(@RequestBody @Valid User newUser,
+                                                        Authentication authentication) {
+        User user = ((JwtUser) authentication.getPrincipal()).getUser();
+        newUser.setPassword(user.getPassword());
+        newUser.setRole(user.getRole());
+        newUser.setStatus(user.getStatus());
+        newUser.setId(user.getId());
+        EntityModel<User> userModel = assembler.toModel(userService.replaceUser(newUser, user.getId()));
+        return ResponseEntity.created(userModel.getRequiredLink(IanaLinkRelations.SELF)
+                .toUri()).body(userModel);
+    }
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();

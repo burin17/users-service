@@ -7,6 +7,7 @@ import com.gmail.burinigor7.usersservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.usersservice.util.UserRoleValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final UserRoleValidator userRoleValidator;
+    private final PasswordEncoder passwordEncoder;
 
     public User user(Long id) {
         return userRepository.findById(id)
@@ -56,11 +58,13 @@ public class UserService {
     }
 
     public User newUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRoleValidator.validate(user);
         return userRepository.save(user);
     }
 
     public User replaceUser(User newUser, Long id) {
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         userRoleValidator.validate(newUser);
         return userRepository.findById(id)
                 .map(fetched -> userRepository.save(replaceUser(fetched, newUser)))
@@ -83,6 +87,8 @@ public class UserService {
         fetched.setRole(newUser.getRole());
         fetched.setEmail(newUser.getEmail());
         fetched.setLogin(newUser.getLogin());
+        fetched.setPassword(newUser.getPassword());
+        fetched.setStatus(newUser.getStatus());
         return fetched;
     }
 }
