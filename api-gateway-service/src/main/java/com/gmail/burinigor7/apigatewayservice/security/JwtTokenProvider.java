@@ -1,7 +1,7 @@
-package com.gmail.burinigor7.userscrudservice.security;
+package com.gmail.burinigor7.apigatewayservice.security;
 
-import com.gmail.burinigor7.userscrudservice.domain.User;
-import com.gmail.burinigor7.userscrudservice.exception.JwtAuthenticationException;
+import com.gmail.burinigor7.apigatewayservice.dto.UserAuthDataDto;
+import com.gmail.burinigor7.apigatewayservice.exception.JwtAuthenticationException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -24,8 +24,6 @@ import java.util.Date;
 public class JwtTokenProvider {
     @Value("${jwt.token.secret}")
     private String secret;
-    @Value("${jwt.token.limit}")
-    private long tokenLimit;
 
     private final UserDetailsService userDetailsService;
 
@@ -58,19 +56,6 @@ public class JwtTokenProvider {
         UserDetails userDetails = userDetailsService.loadUserByUsername(getUsername(token));
         return new UsernamePasswordAuthenticationToken(
                 userDetails, "", userDetails.getAuthorities());
-    }
-
-    public String createToken(User user) {
-        Claims claims = Jwts.claims().setSubject(user.getLogin());
-        claims.put("role", user.getRole().getTitle());
-        Date now = new Date();
-        Date expired = new Date(now.getTime() + tokenLimit);
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(expired)
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
     }
 
     private String getUsername(String token) {

@@ -1,4 +1,4 @@
-package com.gmail.burinigor7.userscrudservice.security;
+package com.gmail.burinigor7.apigatewayservice.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;

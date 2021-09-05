@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gmail.burinigor7.userscrudservice.domain.Role;
 import com.gmail.burinigor7.userscrudservice.domain.Status;
 import com.gmail.burinigor7.userscrudservice.domain.User;
-import com.gmail.burinigor7.userscrudservice.dto.AuthenticationRequestDto;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -82,10 +81,7 @@ public class SecurityTests {
     }
 
     private String getAuthorizationHeader(String username) throws Exception {
-        MvcResult tokenMvcResult = mockMvc.perform(post("/auth/login")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(
-                                new AuthenticationRequestDto(username, username)))) // login and password equals in test environment
+        MvcResult tokenMvcResult = mockMvc.perform(post("/auth/login")) // login and password equals in test environment
                 .andExpect(status().isOk())
                 .andReturn();
         JSONObject jsonObject =

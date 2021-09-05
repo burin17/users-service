@@ -1,8 +1,8 @@
-package com.gmail.burinigor7.userscrudservice.security;
+package com.gmail.burinigor7.apigatewayservice.security;
 
-import com.gmail.burinigor7.userscrudservice.domain.Role;
-import com.gmail.burinigor7.userscrudservice.domain.Status;
-import com.gmail.burinigor7.userscrudservice.domain.User;
+import com.gmail.burinigor7.apigatewayservice.dto.UserAuthDataDto;
+import com.gmail.burinigor7.apigatewayservice.dto.Role;
+import com.gmail.burinigor7.apigatewayservice.dto.Status;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,9 +12,9 @@ import java.util.Collections;
 public class JwtUser implements UserDetails {
     private static final String ROLE_PREFIX = "ROLE_";
 
-    private final User user;
+    private final UserAuthDataDto user;
 
-    public JwtUser(User user) {
+    public JwtUser(UserAuthDataDto user) {
         this.user = user;
     }
 
@@ -53,7 +53,7 @@ public class JwtUser implements UserDetails {
         return user.getStatus() == Status.ACTIVE;
     }
 
-    public User getUser() {
+    public UserAuthDataDto getUser() {
         return user;
     }
 

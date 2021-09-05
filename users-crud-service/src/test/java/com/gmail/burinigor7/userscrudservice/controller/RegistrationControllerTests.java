@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gmail.burinigor7.userscrudservice.config.JacksonMapperConfig;
 import com.gmail.burinigor7.userscrudservice.domain.User;
 import com.gmail.burinigor7.userscrudservice.dto.RegistrationDto;
-import com.gmail.burinigor7.userscrudservice.security.JwtTokenProvider;
 import com.gmail.burinigor7.userscrudservice.service.UserService;
 import com.gmail.burinigor7.userscrudservice.util.RoleByTitleConverter;
 import org.json.JSONException;
@@ -33,9 +32,6 @@ public class RegistrationControllerTests {
 
     @MockBean
     private RoleByTitleConverter roleByTitleConverter;
-
-    @MockBean
-    private JwtTokenProvider jwtTokenProvider; // necessary for jwtSecurityConfig bean
 
     @Autowired
     private MockMvc mockMvc; // fake http requests sending

@@ -1,7 +1,7 @@
-package com.gmail.burinigor7.userscrudservice.security;
+package com.gmail.burinigor7.apigatewayservice.security;
 
-import com.gmail.burinigor7.userscrudservice.dao.UserRepository;
-import com.gmail.burinigor7.userscrudservice.domain.User;
+import com.gmail.burinigor7.apigatewayservice.dto.UserAuthDataDto;
+import com.gmail.burinigor7.apigatewayservice.internalcalls.UserFeignInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,11 +12,11 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class JwtUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
+    private final UserFeignInterface userClient;
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByLogin(login);
+        Optional<UserAuthDataDto> user = userClient.fetchUserByLogin(login);
         if (user.isEmpty()) {
             throw new UsernameNotFoundException("User with login = " + login + " not found");
         }

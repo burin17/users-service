@@ -1,18 +1,46 @@
 server:
   port: 8080
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+zuul:
+  routes:
+    users-crud-service-user:
+      path: /admin/users
+      serviceId: users-crud-service
+    users-crud-service-admin:
+      path: /users
+      serviceId: users-crud-service
+    login-service:
+      path: /auth/login
+      serviceId: login-service
+
+
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    registerWithEureka: true
+  instance:
+    preferIpAddress: true
 
 spring:
-  cloud:
-    gateway:
-      routes:
-        - id: users-crud-service
-          uri: lb://users-crud-service
-          predicates:
-            - Path=/users/**
   application:
-    name: api-gateway
+    name: zuul-service
+
+jwt:
+  token:
+    secret: secret
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 160000000
+        readTimeout: 160000000
+

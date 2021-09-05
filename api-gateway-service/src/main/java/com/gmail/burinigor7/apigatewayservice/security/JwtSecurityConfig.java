@@ -1,4 +1,4 @@
-package com.gmail.burinigor7.userscrudservice.security;
+package com.gmail.burinigor7.apigatewayservice.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,8 +36,9 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/login", "/registration")
+                .antMatchers("/auth/login")
                     .permitAll()
+                .antMatchers("/admin/**", "/roles/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));

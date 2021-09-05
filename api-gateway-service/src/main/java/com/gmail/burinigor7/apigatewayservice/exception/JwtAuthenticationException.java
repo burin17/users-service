@@ -1,4 +1,4 @@
-package com.gmail.burinigor7.userscrudservice.exception;
+package com.gmail.burinigor7.apigatewayservice.exception;
 
 import org.springframework.security.core.AuthenticationException;
 
