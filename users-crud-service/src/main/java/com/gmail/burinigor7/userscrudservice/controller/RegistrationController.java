@@ -31,7 +31,6 @@ public class RegistrationController {
     @PostMapping
     public ResponseEntity<?> register(@RequestBody @Valid RegistrationDto dto) {
         User createdUser = userService.newUser(dto.toOrdinaryUser());
-        loginHref = "http://localhost:8080/auth/login";
         String loginRel = "login";
         EntityModel<User> userModel =
                 EntityModel.of(createdUser,

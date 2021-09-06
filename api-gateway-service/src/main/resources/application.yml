@@ -8,22 +8,35 @@ management:
         include: "*"
 
 zuul:
+  host:
+    connect-timeout-millis: 160000000
+    socket-timeout-millis: 160000000
   routes:
     users-crud-service-user:
-      path: /admin/users
+      path: /admin/users/**
       serviceId: users-crud-service
+      stripPrefix: false
     users-crud-service-admin:
-      path: /users
+      path: /users/**
       serviceId: users-crud-service
-    login-service:
+      stripPrefix: false
+    users-crud-service-role:
+      path: /roles/**
+      serviceId: users-crud-service
+      stripPrefix: false
+    users-crud-service-registration:
+      path: /registration
+      serviceId: users-crud-service
+      stripPrefix: false
+    login-service-login:
       path: /auth/login
       serviceId: login-service
-
+      stripPrefix: false
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://registry-service:8761/eureka/
     fetch-registry: true
     registerWithEureka: true
   instance:
@@ -36,11 +49,3 @@ spring:
 jwt:
   token:
     secret: secret
-
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 160000000
-        readTimeout: 160000000
-
