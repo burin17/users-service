@@ -1,3 +1,4 @@
+const Eureka = require('eureka-js-client').Eureka
 const express = require("express");
 const app = express();
 
@@ -10,6 +11,33 @@ const pool = new Pool({
     port: 5432,
 })
 
+const eurekaClient = new Eureka({
+   instance: {
+       app: "admin-deletion-service",
+       hostName: "localhost",
+       ipAddr: '127.0.0.1',
+       port: {
+           '$': 9011,
+           '@enabled': 'true',
+       },
+       statusPageUrl: 'http://localhost:9011/info',
+       vipAddress: 'jq.test.something.com',
+       dataCenterInfo: {
+           '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
+           name: 'MyOwn',
+       },
+   },
+   eureka: {
+       host: '127.0.0.1',
+       port: 8761,
+       servicePath: '/eureka/apps/'
+   }
+});
+
+eurekaClient.start(error => {
+    console.log(error || "user service registered")
+});
+
 app.get("/api/users/is-allowed/:id", function(request, response){
     const id = request.params.id; // получаем id
     pool.query('select * from usr where id = $1', [id], (err, res) => {
@@ -20,6 +48,6 @@ app.get("/api/users/is-allowed/:id", function(request, response){
     });
 });
 
-app.listen(9001, function(){
+app.listen(9011, function(){
 
 });
