@@ -8,7 +8,8 @@ from flask import request, jsonify
 app = flask.Flask(__name__)
 eureka_client.init(eureka_server="http://localhost:8761/eureka",
                    app_name="admin-deletion-service",
-                   instance_port=9021)
+                   instance_port=9021,
+                   instance_host='localhost')
 
 @app.route('/api/users/is-allowed/<id>', methods=['GET'])
 def isAllowed(id):
