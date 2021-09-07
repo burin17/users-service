@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Nodejs ###
+node_modules
+/nodejs-admin-deletion-service/package-lock.json
+
+### Python ###
+venv
