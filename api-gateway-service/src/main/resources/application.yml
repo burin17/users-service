@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+zuul:
+  routes:
+    users-crud-service-user:
+      path: /admin/users/**
+      serviceId: users-crud-service
+      stripPrefix: false
+    users-crud-service-admin:
+      path: /users/**
+      serviceId: users-crud-service
+      stripPrefix: false
+    users-crud-service-role:
+      path: /roles/**
+      serviceId: users-crud-service
+      stripPrefix: false
+    users-crud-service-registration:
+      path: /registration
+      serviceId: users-crud-service
+      stripPrefix: false
+    login-service-login:
+      path: /auth/login
+      serviceId: login-service
+      stripPrefix: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://registry-service:8761/eureka/
+    fetch-registry: true
+    registerWithEureka: true
+  instance:
+    preferIpAddress: true
+
+spring:
+  application:
+    name: zuul-service
+
+jwt:
+  token:
+    secret: secret
+
+ribbon:
+  ReadTimeout: 100000

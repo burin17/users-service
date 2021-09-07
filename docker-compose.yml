@@ -1,0 +1,93 @@
+version: '3'
+
+services:
+  users-crud-db:
+    image: postgres:13.3-alpine
+    container_name: users-crud-db
+    ports:
+      - "55432:5432"
+#    volumes:
+#      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=usrs
+  users-crud-service:
+    image: users-crud-service:v1
+    build:
+      context: .
+    container_name: users-crud-service-container
+    ports:
+      - "9000:9000"
+    expose:
+      - "9000"
+    depends_on:
+      - users-crud-db
+      - admin-deletion-service
+      - registry-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://users-crud-db:5432/usrs
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+      - SPRING_DATASOURCE_DRIVERCLASSNAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQL10Dialect
+      - ADMINDELETIONSERVICE_URL_CHECK=http://admin-deletion-service:9001/api/users/is-allowed/{id}
+      - URL_LOGIN=http://login-service:9002/auth/login
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://registry-service:8761/eureka
+  admin-deletion-db:
+    image: postgres:13.3-alpine
+    container_name: admin-deletion-db
+    ports:
+      - "56432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=admin_deletion_granted
+  admin-deletion-service:
+    image: admin-deletion-service:v1
+    build:
+      context: .
+    container_name: admin-deletion-service
+    ports:
+      - "9001:9001"
+    depends_on:
+      - admin-deletion-db
+      - registry-service
+    environment:
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://admin-deletion-db:5432/admin_deletion_granted
+        - SPRING_DATASOURCE_USERNAME=postgres
+        - SPRING_DATASOURCE_PASSWORD=postgres
+        - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+        - SPRING_DATASOURCE_DRIVERCLASSNAME=org.postgresql.Driver
+  registry-service:
+    image: registry-service:v1
+    build:
+      context: .
+    container_name: registry-service
+    ports:
+      - "8761:8761"
+  login-service:
+    image: login-service:v1
+    build:
+      context: .
+    container_name: login-service
+    ports:
+      - "9002:9002"
+    depends_on:
+      - registry-service
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://registry-service:8761/eureka/
+  api-gateway-service:
+   image: api-gateway-service:v1
+   build:
+     context: .
+   container_name: api-gateway-service
+   ports:
+     - "8080:8080"
+   depends_on:
+     - registry-service
+     - login-service
+     - users-crud-service
+   environment:
+     - eureka.client.serviceUrl.defaultZone=http://registry-service:8761/eureka/

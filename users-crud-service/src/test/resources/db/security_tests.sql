@@ -1,0 +1,1 @@
+insert into usr(id, email, first_name, last_name, login, password, patronymic, phone_number, status, user_role) values (0, 'user@email.com', 'user', 'user', 'user', '$2a$12$rwPOVklES8quuaXlQP1l8uYIhECLu7mEcZqahzrnnRnEqtBUDJLXe', null, '+70000000001', 'ACTIVE', 2) on conflict do nothing;
