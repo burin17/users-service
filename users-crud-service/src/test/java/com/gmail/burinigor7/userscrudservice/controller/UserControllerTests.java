@@ -2,6 +2,7 @@ package com.gmail.burinigor7.userscrudservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gmail.burinigor7.userscrudservice.controller.admin.UserController;
 import com.gmail.burinigor7.userscrudservice.domain.Role;
 import com.gmail.burinigor7.userscrudservice.domain.Status;
 import com.gmail.burinigor7.userscrudservice.domain.User;
@@ -10,7 +11,6 @@ import com.gmail.burinigor7.userscrudservice.exception.NoGrantsToDeleteAdminExce
 import com.gmail.burinigor7.userscrudservice.exception.UserNotFoundException;
 import com.gmail.burinigor7.userscrudservice.exception.UserRoleIdNotSpecifiedException;
 import com.gmail.burinigor7.userscrudservice.exception.UserRoleNotPresentedException;
-import com.gmail.burinigor7.userscrudservice.security.JwtTokenProvider;
 import com.gmail.burinigor7.userscrudservice.service.UserService;
 import com.gmail.burinigor7.userscrudservice.util.RoleByTitleConverter;
 import com.gmail.burinigor7.userscrudservice.util.UserModelAssembler;
@@ -50,9 +50,6 @@ public class UserControllerTests {
 
     @MockBean
     private RoleByTitleConverter roleByTitleConverter;
-
-    @MockBean
-    private JwtTokenProvider jwtTokenProvider; // necessary for jwtSecurityConfig bean
 
     @Autowired
     private MockMvc mockMvc; // fake http requests sending
@@ -392,14 +389,19 @@ public class UserControllerTests {
     }
 
     @Test
-    public void deleteRole_whenValidInput_thenReturns204() throws Exception {
+    public void deleteAdmin_whenValidInput_thenReturns204() throws Exception {
         long deleteUserId = 1L;
+        long currentId = 2L;
 
-        mockMvc.perform(delete("/users/{userId}", deleteUserId))
+        mockMvc.perform(delete("/users/admin/{userId}/{currentId}", deleteUserId,
+                        currentId))
                 .andExpect(status().isNoContent());
 
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(userService, times(1)).deleteUser(idCaptor.capture());
+        ArgumentCaptor<Long> currentIdCaptor = ArgumentCaptor.forClass(Long.class);
+
+        verify(userService, times(1)).deleteUser(idCaptor.capture(),
+                currentIdCaptor.capture());
         assertEquals(deleteUserId, idCaptor.getValue());
     }
 
@@ -471,8 +473,10 @@ public class UserControllerTests {
     public void deleteUser_whenUserNotExists_thenReturns404()
             throws Exception {
         long deletedUserId = 1L;
+        long currentId = 2L;
 
-        doThrow(UserNotFoundException.class).when(userService).deleteUser(deletedUserId);
+        doThrow(UserNotFoundException.class).when(userService).deleteUser(deletedUserId,
+                currentId);
 
         mockMvc.perform(delete("/users/{userId}", deletedUserId))
                 .andExpect(status().isNotFound());
@@ -482,9 +486,10 @@ public class UserControllerTests {
     public void deleteUser_whenAdminDeletionServiceNotAccessibleExceptionThrown_thenReturns503()
             throws Exception {
         long deletedUserId = 1L;
+        long currentId = 2L;
 
         doThrow(AdminDeletionServiceNotAccessibleException.class).when(userService)
-                .deleteUser(deletedUserId);
+                .deleteUser(deletedUserId, currentId);
 
         mockMvc.perform(delete("/users/{userId}", deletedUserId))
                 .andExpect(status().isServiceUnavailable());
@@ -494,8 +499,10 @@ public class UserControllerTests {
     public void deleteUser_whenNoGrantsToDeleteAdminExceptionThrown_thenReturns403()
             throws Exception {
         long deletedUserId = 1L;
+        long currentId = 1L;
 
-        doThrow(NoGrantsToDeleteAdminException.class).when(userService).deleteUser(deletedUserId);
+        doThrow(NoGrantsToDeleteAdminException.class).when(userService)
+                .deleteUser(deletedUserId, currentId);
 
         mockMvc.perform(delete("/users/{userId}", deletedUserId))
                 .andExpect(status().isForbidden());

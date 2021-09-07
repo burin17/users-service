@@ -2,10 +2,10 @@ package com.gmail.burinigor7.userscrudservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gmail.burinigor7.userscrudservice.controller.admin.RoleController;
 import com.gmail.burinigor7.userscrudservice.dao.RoleRepository;
 import com.gmail.burinigor7.userscrudservice.domain.Role;
 import com.gmail.burinigor7.userscrudservice.exception.RoleNotFoundException;
-import com.gmail.burinigor7.userscrudservice.security.JwtTokenProvider;
 import com.gmail.burinigor7.userscrudservice.service.RoleService;
 import com.gmail.burinigor7.userscrudservice.util.RoleModelAssembler;
 import org.json.JSONObject;
@@ -43,9 +43,6 @@ public class RoleControllerTests {
 
     @MockBean
     private RoleRepository roleRepository; // necessary for roleByTitleConverter bean
-
-    @MockBean
-    private JwtTokenProvider jwtTokenProvider; // necessary for jwtSecurityConfig bean
 
     @Autowired
     private MockMvc mockMvc; // fake http requests sending

@@ -1,0 +1,1 @@
+insert into usr (id) values (1);

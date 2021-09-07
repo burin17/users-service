@@ -6,11 +6,9 @@ import com.gmail.burinigor7.userscrudservice.domain.Role;
 import com.gmail.burinigor7.userscrudservice.domain.User;
 import com.gmail.burinigor7.userscrudservice.exception.NoGrantsToDeleteAdminException;
 import com.gmail.burinigor7.userscrudservice.exception.UserNotFoundException;
-import com.gmail.burinigor7.userscrudservice.security.JwtUser;
 import com.gmail.burinigor7.userscrudservice.util.UserRoleValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -77,12 +75,12 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    public void deleteUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
+    public void deleteUser(Long deletedId, Long currentId) {
+        Optional<User> user = userRepository.findById(deletedId);
         if (user.isPresent()) {
-            deleteUser(user.get());
+            deleteUser(user.get(), currentId);
         } else {
-            throw new UserNotFoundException(id);
+            throw new UserNotFoundException(deletedId);
         }
     }
 
@@ -99,23 +97,17 @@ public class UserService {
         return fetched;
     }
 
-    private void deleteUser(User user) {
+    private void deleteUser(User user, Long currentAdminId) {
         final String adminRoleTitle = "ADMIN";
         if (user.getRole().getTitle().equals(adminRoleTitle)) {
-            long id = getIdOfAuthenticatedUser();
-            if (adminDeletionApi.isAllowed(id)) {
+            if (adminDeletionApi.isAllowed(currentAdminId)) {
                 userRepository.delete(user);
             } else {
                 throw new NoGrantsToDeleteAdminException(
-                        "Admin with id = " + id + " hasn't grants to delete another admin.");
+                        "Admin with id = " + currentAdminId + " hasn't grants to delete another admin.");
             }
         } else {
             userRepository.delete(user);
         }
-    }
-
-    Long getIdOfAuthenticatedUser() {
-        return ((JwtUser) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal()).getUser().getId();
     }
 }
