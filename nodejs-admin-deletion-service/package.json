@@ -1,0 +1,8 @@
+{
+  "name": "nodejs-admin-deletion-service",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.17.0",
+    "pg": "^8.7.1"
+  }
+}
