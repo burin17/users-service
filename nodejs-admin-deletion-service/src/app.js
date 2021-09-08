@@ -14,14 +14,14 @@ const pool = new Pool({
 const eurekaClient = new Eureka({
    instance: {
        app: "admin-deletion-service",
-       hostName: "localhost",
+       hostName: "c710.dlink:admin-deletion-service:9011",
        ipAddr: '127.0.0.1',
        port: {
            '$': 9011,
            '@enabled': 'true',
        },
-       statusPageUrl: 'http://localhost:9011/info',
-       vipAddress: 'jq.test.something.com',
+       statusPageUrl: 'http://c710.dlink:9011/actuator/info',
+       vipAddress: 'http://c710.dlink:9011',
        dataCenterInfo: {
            '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
            name: 'MyOwn',
