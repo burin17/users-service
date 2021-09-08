@@ -11,6 +11,7 @@ const pool = new Pool({
 })
 
 app.get("/api/users/is-allowed/:id", function(request, response){
+    console.log('node instance');
     const id = request.params.id; // получаем id
     pool.query('select * from usr where id = $1', [id], (err, res) => {
         if(err) {

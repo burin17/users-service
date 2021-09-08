@@ -15,6 +15,7 @@ public class UserController {
 
     @GetMapping("/is-allowed/{id}")
     public boolean isDeletionAllowed(@PathVariable Long id) {
+        System.out.println("java instance");
         return userService.isDeletionAllowed(id);
     }
 }
