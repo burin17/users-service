@@ -1,7 +1,18 @@
-const Eureka = require('eureka-js-client').Eureka
+const eureka = require('eureka-nodejs-client')({
+    eureka: {
+        serviceUrl: ['http://localhost:8761'],
+        pollIntervalSeconds: 10,
+        registerWithEureka: true,
+    },
+    instance:{
+        app: 'admin-deletion-service',
+        ipAddr: 'localhost',
+        port: 9011
+    }
+}, 'info')
+
 const express = require("express");
 const app = express();
-
 const Pool = require("pg").Pool
 const pool = new Pool({
     user: 'postgres',
@@ -11,32 +22,7 @@ const pool = new Pool({
     port: 5432,
 })
 
-const eurekaClient = new Eureka({
-   instance: {
-       app: "admin-deletion-service",
-       hostName: "c710.dlink:admin-deletion-service:9011",
-       ipAddr: '127.0.0.1',
-       port: {
-           '$': 9011,
-           '@enabled': 'true',
-       },
-       statusPageUrl: 'http://c710.dlink:9011/actuator/info',
-       vipAddress: 'http://c710.dlink:9011',
-       dataCenterInfo: {
-           '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
-           name: 'MyOwn',
-       },
-   },
-   eureka: {
-       host: '127.0.0.1',
-       port: 8761,
-       servicePath: '/eureka/apps/'
-   }
-});
-
-eurekaClient.start(error => {
-    console.log(error || "user service registered")
-});
+eureka.start()
 
 app.get("/api/users/is-allowed/:id", function(request, response){
     console.log('node instance')
