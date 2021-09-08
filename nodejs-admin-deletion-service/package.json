@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "express": "^4.17.0",
-    "pg": "^8.7.1"
+    "pg": "^8.7.1",
+    "eureka-js-client": "4.5.0"
   }
 }
