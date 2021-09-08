@@ -29,6 +29,10 @@ zuul:
       path: /auth/login
       serviceId: login-service
       stripPrefix: false
+    admin-deletion-service:
+      path: /api/users/is-allowed/**
+      serviceId: admin-deletion-service
+      stripPrefix: false
 
 eureka:
   client:
