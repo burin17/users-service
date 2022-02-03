@@ -9,7 +9,7 @@ pipeline {
                     cd users-crud-service
                     mvn package -Dmaven.test.skip
                     docker docker build -t burin17/users-crud-service:v1
-                    docker login -p ${DOCKER_PASS} -u burin17
+                    docker login -p ${DOCKERHUB_PASS} -u burin17
                     docker push burin17/users-crud-service:v1
                     cd ..
                     cd registry-service
