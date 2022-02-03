@@ -16,6 +16,7 @@
         <module>registry-service</module>
         <module>users-crud-service</module>
         <module>admin-deletion-service</module>
+        <module>login-service</module>
     </modules>
 
 </project>

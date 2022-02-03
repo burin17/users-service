@@ -13,7 +13,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=usrs
   users-crud-service:
-    image: users-crud-service:v1
+    image: burin17/users-crud-service:v1
     build:
       context: .
     container_name: users-crud-service-container
@@ -45,7 +45,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=admin_deletion_granted
   admin-deletion-service:
-    image: admin-deletion-service:v1
+    image: burin17/admin-deletion-service:v1
     build:
       context: .
     container_name: admin-deletion-service
@@ -61,14 +61,14 @@ services:
         - SPRING_JPA_HIBERNATE_DDL_AUTO=create
         - SPRING_DATASOURCE_DRIVERCLASSNAME=org.postgresql.Driver
   registry-service:
-    image: registry-service:v1
+    image: burin17/registry-service:v1
     build:
       context: .
     container_name: registry-service
     ports:
       - "8761:8761"
   login-service:
-    image: login-service:v1
+    image: burin17/login-service:v1
     build:
       context: .
     container_name: login-service
@@ -79,7 +79,7 @@ services:
     environment:
       - eureka.client.serviceUrl.defaultZone=http://registry-service:8761/eureka/
   api-gateway-service:
-   image: api-gateway-service:v1
+   image: burin17/api-gateway-service:v1
    build:
      context: .
    container_name: api-gateway-service
