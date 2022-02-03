@@ -1,7 +1,21 @@
+properties([pipelineTriggers([githubPush()])])
 pipeline {
     agent { docker {burin17}}
 
     stages {
+        stage('Checkout SCM') {
+          steps {
+            checkout([
+              $class: 'GitSCM',
+              branches: [[name: 'master']],
+              userRemoteConfigs: [[
+                url: 'git@github.com:burin17/users-service.git',
+                credentialsId: 'users-service-token',
+              ]]
+             ])
+           }
+        }
+
         stage('Build images') {
             steps {
                 echo "Build of images started"
