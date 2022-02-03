@@ -1,7 +1,8 @@
 properties([pipelineTriggers([githubPush()])])
+
 pipeline {
     agent { docker { image 'burin17/users-service-pipeline' } }
-
+f
     stages {
         stage('Checkout SCM') {
           steps {
