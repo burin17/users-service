@@ -2,7 +2,7 @@
 <h3>users-crud-service</h3>
 Contains CRUD operations for User and Role entities
 <h3>admin-deletion-service</h3>
-Resolve permission of admin users to delete another admin users
+Allows you to determine if an admin has the right to delete other admins
 <h3>login-service</h3>
 Issues JWT token using the credentials
 <h3>api-gateway-service</h3>
